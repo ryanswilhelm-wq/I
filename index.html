@@ -2965,22 +2965,6 @@ function showChoice(title, text, okText, cancelText, onOK){
 </script>
 </script>
 
-<script>
-// NPC_SMILE_TIMEOUT: revert temporary smiles
-(function(){
-  try{
-    setInterval(function(){
-      if(!window.save || !save.npcMood) return;
-      for(const k in save.npcMood){
-        if(save.contracts && save.contracts[k]) continue;
-        if(save.npcMood[k]==='smile'){
-          save.npcMood[k]='neutral';
-        }
-      }
-    }, 1500);
-  }catch(e){}
-})();
-</script>
 
 </body>
 </html>
