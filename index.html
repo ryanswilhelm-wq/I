@@ -2323,6 +2323,7 @@ return;
       updatePrices();
       try{ refreshShopButtons(); }catch(e){}
       try { applyExtras(); } catch(e){}
+      document.getElementById('enableExtras').style.display = 'none';
       requestAnimationFrame(loop);
     }
 
