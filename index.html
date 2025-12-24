@@ -2349,65 +2349,57 @@ return;
   try{ el.addEventListener('touchend', run, {passive:false}); }catch(e){}
 }
 
-    bindStart(btnNew, function(){
-      const startScreen = document.getElementById('startScreen');
-      const startCard = document.getElementById('startCard');
+   bindStart(btnNew, function(){
+  lockStartButtons(true); // 🔒 lock immediately
 
-      // swap buttons for instructions
-      if(startCard){
-        startCard.innerHTML = `
-          <img src="icon-192.png" style="width:96px;height:96px;border-radius:22px;
-            box-shadow:0 6px 18px rgba(0,0,0,.25);margin-bottom:8px;">
-          <div id="title">🦫 Gopher Trapper</div>
-          <div class="small" style="font-size:15px;font-weight:800;line-height:1.4;">
-            Your Town Is Being Overrun By Gophers.<br><br>
-            It Is Your Job To Clean Up Your Town.<br><br>
-            Set Traps At Mounds. Check Your Traps The Next Day<br><br>
-            Speak To Your Neighbors To Earn Their Business <br><br>
-            On Day 7, Your Rival Will Also Try To Gain Customers.<br><br>
-            Save up money To Upgrade Traps And purchase properties.
-          </div>
-          <div class="small" style="margin-top:12px;">Starting…</div>
-        `;
-      }
+  const startCard = document.getElementById('startCard');
+  if(startCard){
+    startCard.innerHTML = `
+      <img src="icon-192.png" style="width:96px;height:96px;border-radius:22px;
+        box-shadow:0 6px 18px rgba(0,0,0,.25);margin-bottom:8px;">
+      <div id="title">🦫 Gopher Trapper</div>
+      <div class="small" style="font-size:15px;font-weight:800;line-height:1.4;">
+        Your Town Is Being Overrun By Gophers.<br><br>
+        It Is Your Job To Clean Up Your Town.<br><br>
+        Set Traps At Mounds. Check Traps Tomorrow.<br><br>
+        Speak To Neighbors To Earn Their Business.<br><br>
+        On Day 7, Your Rival Appears.
+      </div>
+      <div class="small" style="margin-top:12px;">Starting in 7 seconds…</div>
+    `;
+  }
 
-      setTimeout(()=>{
-        save=defaultSave(); holeIdCounter=1;
-        buildTown();
-        rebuildNPCs();
-        startDaySpawn(true);
-        spawnAtHomeDriveway();
-        persist();
-        startUI();
-        showToast("Set traps on the 2 holes in your yard.");
-      },7000);
-    });
+  setTimeout(()=>{
+    save = defaultSave();
+    holeIdCounter = 1;
+    buildTown();
+    rebuildNPCs();
+    startDaySpawn(true);
+    spawnAtHomeDriveway();
+    persist();
+    lockStartButtons(false); // 🔓 unlock (safety)
+    startUI();
+    showToast("Set traps on the 2 holes in your yard.");
+  }, 7000);
+});
 
-    /* tapAnywhereStart fallback */
-(function(){
-  try{
-    var startRoot=document.getElementById('startScreen');
-    if(!startRoot) return;
-    var fired=false;
-    function maybeStart(){
-      if(fired) return;
-      fired=true;
-      try{ if(btnContinue && !btnContinue.disabled) btnContinue.click(); else if(btnNew) btnNew.click(); }catch(e){}
-      setTimeout(function(){ fired=false; }, 500);
-    }
-    startRoot.addEventListener('pointerdown', function(e){ try{ e.preventDefault(); }catch(_){} maybeStart(); }, {passive:false});
-    startRoot.addEventListener('touchstart', function(e){ try{ e.preventDefault(); }catch(_){} maybeStart(); }, {passive:false});
-  }catch(e){}
-})();
+
+  
 bindStart(btnContinue, function(){
-      save=migrateSave(loadSave() || save);
-      buildTown();
-      rebuildNPCs();
-      if(save.day===1 && save.holes.length===0) startDaySpawn(true);
-      setGateOpen('home', true);
-      persist();
-      startUI();
-    });
+  lockStartButtons(true);
+
+  setTimeout(()=>{
+    save = migrateSave(loadSave() || save);
+    buildTown();
+    rebuildNPCs();
+    if(save.day===1 && save.holes.length===0) startDaySpawn(true);
+    spawnAtHomeDriveway();
+    persist();
+    lockStartButtons(false);
+    startUI();
+  }, 7000);
+});
+
 
     // extra: ensure resize after first paint (GitHub Pages + iOS)
     resize();
