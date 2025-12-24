@@ -2379,7 +2379,6 @@ return;
       document.getElementById('enableExtras').style.display = 'none';
       requestAnimationFrame(loop);
     }
-function runStartupProgress(durationMs, onDone){
   const bar = document.getElementById('startProgress');
 
   // If progress bar is missing, just wait
@@ -2592,16 +2591,20 @@ function showChoice(title, text, okText, cancelText, onOK){
       return !!(save && save.owned && save.owned[lotId]);
     }catch(e){ return false; }
   }
+  function lotPrice(name){
   if (
-  name.includes("fire") ||
-  name.includes("station") ||
-  name.includes("department") ||
-  name.includes("store") ||
-  name.includes("church") ||
-  name.includes("grocery") ||
-  name.includes("school") ||
-  name.includes("diner") 
-) return 500;
+    name.includes("fire") ||
+    name.includes("station") ||
+    name.includes("department") ||
+    name.includes("store") ||
+    name.includes("church") ||
+    name.includes("grocery") ||
+    name.includes("school") ||
+    name.includes("diner")
+  ) return 500;
+  return 100;
+}
+
   
   function nearestBuyableLot(px,py){
     try{
@@ -2941,19 +2944,10 @@ function showChoice(title, text, okText, cancelText, onOK){
 </html>
 
 <script>
-// NPC_SMILE_TIMEOUT: revert temporary smiles
-(function(){
-  try{
-    setInterval(function(){
-      if(!window.save || !save.npcMood) return;
-      for(const k in save.npcMood){
-        if(save.contracts && save.contracts[k]) continue;
-        // neutralize smiles after ~1.5s
-        if(save.npcMood[k]==='smile'){
-          save.npcMood[k]='neutral';
-        }
-      }
-    }, 1500);
-  }catch(e){}
-})();
-</script> 
+  // NPC_SMILE_TIMEOUT
+  (function(){
+    ...
+  })();
+</script>
+</body>
+</html>
