@@ -593,30 +593,15 @@ addLot("Diner","Diner",
     }
     // --- NPCs (visual only) ---
     let npcs=[];
-   function rebuildNPCs(){
-  npcs = [];
-
-  for (const l of lots) {
-    if (!l) continue;
-
-    // 1️⃣ Door NPC (existing behavior)
-    if (l.door) {
-      const ox = (l.id === 'home') ? -26 : 26;
-      npcs.push({
-        lotId: l.id,
-        x: l.door.x + ox,
-        y: l.door.y + 28
-      });
-    }
-
-    // 2️⃣ Mailbox NPC (NEW – works for civic buildings)
-    if (l.mailbox) {
-      npcs.push({
-        lotId: l.id,
-        x: l.mailbox.x,
-        y: l.mailbox.y - 6   // slightly above mailbox
-      });
-    }
+   // --- NPCs (visual only) ---
+let npcs=[];
+function rebuildNPCs(){
+  npcs=[];
+  for(const l of lots){
+    if(!l || !l.door) continue;
+    // put NPC just outside yard near door for houses + civic buildings
+    const ox = (l.id==='home') ? -26 : 26;
+    npcs.push({lotId:l.id, x:l.door.x + ox, y:l.door.y + 28});
   }
 }
 
