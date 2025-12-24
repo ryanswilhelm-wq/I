@@ -1008,7 +1008,7 @@ function randomRivalEvent(){
           if(candidates.length){
             const pick = candidates[Math.floor(rand01()*candidates.length)];
             const name = lotName(pick);
-            const baseCost = (/fire|station|department|store|church|school/i.test(name)) ? 500 : 100;
+            const baseCost = (/fire|station|department|store|church|school|diner/i.test(name)) ? 500 : 100;
             if((save.rival.money||0) >= baseCost){
               save.rival.money -= baseCost;
               save.rival.ownedProps[pick] = true;
@@ -2111,7 +2111,7 @@ ctx.fillStyle='#4c2f17'; ctx.beginPath(); ctx.arc(sx-1,sy-23,10,Math.PI,Math.PI*
                 // Optional property offer if not owned
                 if(!save.ownedProps[lotId]){
                   const name=lotName(lotId);
-                  const cost = (/fire|station|department|store|church|school/i.test(name)) ? 500 : 100;
+                  const cost = (/fire|station|department|store|church|school|diner/i.test(name)) ? 500 : 100;
                   const incomePerDay = (cost===500) ? 50 : 20;
                   showChoice(name, "You have my business, don’t let me down. $"+cost+"?\n(Owned properties earn $"+incomePerDay+" overnight.)", "Buy ($"+cost+")", "No thanks", ()=>{
                     if(save.money < cost){ _toast("Need $"+cost); return; }
@@ -2154,7 +2154,7 @@ return;
               e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation();
               const lotId=actionBtn.dataset.lot;
               const name=lotName(lotId);
-              const cost = (/fire|station|department|store|church|school/i.test(name)) ? 500 : 100;
+              const cost = (/fire|station|department|store|church|school|diner/i.test(name)) ? 500 : 100;
               if(save.money < cost){ _toast("Need $"+cost); return; }
               save.money -= cost;
               save.ownedProps[lotId]=true;
@@ -2177,7 +2177,7 @@ return;
                 const lotId=d.lot.id;
                 if(!save.ownedProps[lotId] && actionBtn && actionBtn.dataset.mode!=="gate"){
                   const name=lotName(lotId);
-                  const cost = (/fire|station|department|store|church|school/i.test(name)) ? 500 : 100;
+                  const cost = (/fire|station|department|store|church|school|diner/i.test(name)) ? 500 : 100;
                   actionBtn.textContent = "Buy Property ($"+cost+")";
                   actionBtn.dataset.mode="buyProp";
                   actionBtn.dataset.lot=lotId;
@@ -2202,7 +2202,7 @@ return;
                   for(const pid in save.ownedProps){
                     if(!save.ownedProps[pid]) continue;
                     const pname = lotName(pid);
-                    const pcost = (/fire|station|department|store|church|school/i.test(pname)) ? 500 : 100;
+                    const pcost = (/fire|station|department|store|church|school|diner/i.test(pname)) ? 500 : 100;
                     income += (pcost===500) ? 50 : 20;
                   }
                   save.money += income;
@@ -2521,7 +2521,8 @@ function showChoice(title, text, okText, cancelText, onOK){
   name.includes("store") ||
   name.includes("church") ||
   name.includes("grocery") ||
-  name.includes("school")
+  name.includes("school") ||
+  name.includes("diner") ||
 ) return 500;
   
   function nearestBuyableLot(px,py){
