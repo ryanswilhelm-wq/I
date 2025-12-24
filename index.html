@@ -1275,24 +1275,6 @@ function randomRivalEvent(){
         return;
       }
 
-      if(mode==="knock"){ showToast("They don't know you yet. Drop a flyer first."); return; }
-
-      // remember mood
-      try{ setNpcMood(actionBtn.dataset.lot,'frown'); }catch(_e){}
-
-      if(mode==="flyer"){
-        ensureFlyersDropped();
-        const lotId=actionBtn.dataset.lot;
-        if(save.flyers<=0){ showToast("No flyers."); return; }
-        if(save.money<FLYER_DELIVERY_COST){ showToast("Not enough money."); return; }
-        if(save.contracts[lotId] || save.leads[lotId] || save.rivalHold[lotId]){ showToast("Not needed right now."); return; }
-        save.money -= FLYER_DELIVERY_COST;
-        save.flyers -= 1;
-        if(save.flyersDropped[lotId]===save.day){ showToast('Already delivered today.'); return; }
-        save.flyersDropped[lotId]=save.day;
-        showToast(`📨 Flyer delivered to ${lotName(lotId)}.`);
-        return;
-      }
 
       if(mode==="hole"){
         const idx=parseInt(actionBtn.dataset.idx||"-1",10);
