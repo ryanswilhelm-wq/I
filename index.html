@@ -109,6 +109,9 @@
     <button id="btnNew">Start New Game</button>
     <button class="secondary" id="btnContinue">Continue</button>
 <div class="small">v14.0 — Simplified UI & NPC flow</div>
+        <div id="startProgressWrap">
+      <div id="startProgress"></div>
+    </div>
   </div>
 </div>
 
@@ -2376,6 +2379,29 @@ return;
       document.getElementById('enableExtras').style.display = 'none';
       requestAnimationFrame(loop);
     }
+function runStartupProgress(durationMs, onDone){
+  const bar = document.getElementById('startProgress');
+
+  // If progress bar is missing, just wait
+  if(!bar){
+    setTimeout(onDone, durationMs);
+    return;
+  }
+
+  bar.style.width = '0%';
+  const start = performance.now();
+
+  function tick(now){
+    const t = Math.min(1, (now - start) / durationMs);
+    bar.style.width = (t * 100).toFixed(1) + '%';
+    if(t < 1){
+      requestAnimationFrame(tick);
+    } else {
+      onDone();
+    }
+  }
+  requestAnimationFrame(tick);
+}
 
     function bindStart(el, fn){
   if(!el) return;
