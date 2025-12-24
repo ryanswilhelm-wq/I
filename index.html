@@ -1977,17 +1977,28 @@ ctx.fillStyle='#4c2f17'; ctx.beginPath(); ctx.arc(sx-1,sy-23,10,Math.PI,Math.PI*
         };
       }
 
-      // 7) NPC neighbors: build simple NPC list and draw them (non-interfering)
-      try{
-        if(!window.npcs) window.npcs = [];
-        window.npcs.length = 0;
-        for(var i=0;i<lots.length;i++){
-          var l=lots[i];
-          if(l && l.kind==='house' && l.door){
-            window.npcs.push({lotId:l.id, x:l.door.x + (Math.random()<0.5?-34:34), y:(l.yard.y+l.yard.h+22)});
-          }
-        }
-      }catch(_){}
+      // 7) NPC neighbors: civic mailbox NPCs only
+try{
+  if(!window.npcs) window.npcs = [];
+  window.npcs.length = 0;
+
+  for(var i = 0; i < lots.length; i++){
+    var l = lots[i];
+
+    // ONLY civic buildings with mailboxes
+    if(
+      l &&
+      l.kind === 'civic' &&
+      l.mailbox
+    ){
+      window.npcs.push({
+        lotId: l.id,
+        x: l.mailbox.x,
+        y: l.mailbox.y + 10 // small offset below mailbox
+      });
+    }
+  }
+}catch(_){}
 
       // Draw NPCs by wrapping drawTown (safe)
       if(typeof drawTown === 'function' && !drawTown.__wrappedNPC){
