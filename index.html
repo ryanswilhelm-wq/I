@@ -408,10 +408,6 @@ const FLYERS_PACK_PRICE=5; // 10 flyers
     let save=migrateSave(loadSave());
     let running=false;
     let paused=false;
-
-    // AUTO-ENABLE EXTRAS (once per save)
-
-
     
     let playerFrownUntil=0; // performance.now() timestamp
     let playerGrinUntil=0; // brief success grin
@@ -1516,15 +1512,7 @@ document.getElementById('toggleChecklist').addEventListener('click', ()=>{
       clipboard.style.display = (clipboard.style.display==='block') ? 'none' : 'block';
       showToast(clipboard.style.display==='block' ? '📋 Checklist opened' : '📋 Checklist hidden');
     });
-    const extrasBtn = document.getElementById('enableExtras');
-if (extrasBtn) {
-  extrasBtn.addEventListener('click', () => {
-    try { applyExtras(); } catch (e) { console.error(e); }
-  });
-  extrasBtn.style.display = 'none'; // Extras always on
-}
-
-
+    document.getElementById('enableExtras').addEventListener('click', ()=>{ try{ applyExtras(); }catch(e){ try{ showError(e); }catch(_){} } });
 
     document.getElementById('toggleMini').addEventListener('click', ()=>{
       minimapWrap.style.display = (minimapWrap.style.display==='block') ? 'none' : 'block';
@@ -1877,22 +1865,9 @@ ctx.fillStyle='#4c2f17'; ctx.beginPath(); ctx.arc(sx-1,sy-23,10,Math.PI,Math.PI*
     let last=performance.now();
     
     // ===== Optional extras (loaded only after you press Enable Extras in Menu) =====
-    // === AUTO-ENABLE EXTRAS AFTER DEFINITION ===
-setTimeout(() => {
-  try {
-    if (typeof applyExtras === 'function' && !__extrasEnabled) {
-      applyExtras();
-    }
-  } catch (e) {
-    console.error("Extras auto-enable failed:", e);
-  }
-}, 0);
-
+    var __extrasEnabled = false;
+    function applyExtras(){
       if(__extrasEnabled) { showToast("Extras already enabled."); return; }
-
-// === AUTO-ENABLE EXTRAS ON LOAD (NO MENU CLICK REQUIRED) ===
-
-
       __extrasEnabled = true;
       try{ save.extrasEnabled = true; }catch(_){}
       // Ensure goldTraps field exists
@@ -2388,22 +2363,15 @@ return;
       }
 
       setTimeout(()=>{
-  save = defaultSave();
-  holeIdCounter = 1;
-
-  // 🔥 FORCE EXTRAS ON FOR NEW GAME
-  __extrasEnabled = false;
-  applyExtras();
-
-  buildTown();
-  rebuildNPCs();
-  startDaySpawn(true);
-  spawnAtHomeDriveway();
-  persist();
-  startUI();
-  showToast("Set traps on the 2 holes in your yard.");
-},7000);
-
+        save=defaultSave(); holeIdCounter=1;
+        buildTown();
+        rebuildNPCs();
+        startDaySpawn(true);
+        spawnAtHomeDriveway();
+        persist();
+        startUI();
+        showToast("Set traps on the 2 holes in your yard.");
+      },7000);
     });
 
     /* tapAnywhereStart fallback */
@@ -2915,4 +2883,4 @@ function showChoice(title, text, okText, cancelText, onOK){
     }, 1500);
   }catch(e){}
 })();
-</script>
+</script> 
