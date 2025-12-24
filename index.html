@@ -251,6 +251,33 @@
     const startScreen=document.getElementById('startScreen');
     const btnNew=document.getElementById('btnNew');
     const btnContinue=document.getElementById('btnContinue');
+    function lockStartButtons(lock){
+  const btns = [btnNew, btnContinue];
+  btns.forEach(b=>{
+    if(!b) return;
+    b.disabled = lock;
+    b.style.opacity = lock ? '0.55' : '1';
+    b.style.pointerEvents = lock ? 'none' : 'auto';
+  });
+}
+
+function runStartupProgress(durationMs, onDone){
+  const bar = document.getElementById('startProgress');
+  if(!bar){
+    setTimeout(onDone, durationMs);
+    return;
+  }
+
+  const start = performance.now();
+  function tick(now){
+    const t = Math.min(1, (now - start) / durationMs);
+    bar.style.width = (t * 100).toFixed(1) + '%';
+    if(t < 1) requestAnimationFrame(tick);
+    else onDone();
+  }
+  requestAnimationFrame(tick);
+}
+
 const analog=document.getElementById('analog');
     const knob=document.getElementById('knob');
     const actionBtn=document.getElementById('actionBtn');
@@ -2396,15 +2423,7 @@ return;
 });
 
 
-function lockStartButtons(lock){
-  const btns = [btnNew, btnContinue];
-  btns.forEach(b=>{
-    if(!b) return;
-    b.disabled = lock;
-    b.style.opacity = lock ? '0.55' : '1';
-    b.style.pointerEvents = lock ? 'none' : 'auto';
-  });
-}
+
 
   
 bindStart(btnContinue, function(){
