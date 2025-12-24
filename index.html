@@ -410,11 +410,7 @@ const FLYERS_PACK_PRICE=5; // 10 flyers
     let paused=false;
 
     // AUTO-ENABLE EXTRAS (once per save)
-if (save && save.extrasEnabled) {
-  __extrasEnabled = true;
-} else {
-  try { applyExtras(); } catch(e) { console.error(e); }
-}
+
 
     
     let playerFrownUntil=0; // performance.now() timestamp
@@ -1520,10 +1516,14 @@ document.getElementById('toggleChecklist').addEventListener('click', ()=>{
       clipboard.style.display = (clipboard.style.display==='block') ? 'none' : 'block';
       showToast(clipboard.style.display==='block' ? '📋 Checklist opened' : '📋 Checklist hidden');
     });
-    document.getElementById('enableExtras').addEventListener('click', ()=>{ try{ applyExtras(); }catch(e){ tconst extrasBtn = document.getElementById('enableExtras');
+    const extrasBtn = document.getElementById('enableExtras');
 if (extrasBtn) {
-  extrasBtn.style.display = 'none'; // Extras are now always on
+  extrasBtn.addEventListener('click', () => {
+    try { applyExtras(); } catch (e) { console.error(e); }
+  });
+  extrasBtn.style.display = 'none'; // Extras always on
 }
+
 
 
     document.getElementById('toggleMini').addEventListener('click', ()=>{
@@ -1882,15 +1882,7 @@ ctx.fillStyle='#4c2f17'; ctx.beginPath(); ctx.arc(sx-1,sy-23,10,Math.PI,Math.PI*
       if(__extrasEnabled) { showToast("Extras already enabled."); return; }
 
 // === AUTO-ENABLE EXTRAS ON LOAD (NO MENU CLICK REQUIRED) ===
-setTimeout(() => {
-  try {
-    if (!__extrasEnabled) {
-      applyExtras();
-    }
-  } catch (e) {
-    console.error("Auto-enable extras failed:", e);
-  }
-}, 0);
+
 
       __extrasEnabled = true;
       try{ save.extrasEnabled = true; }catch(_){}
