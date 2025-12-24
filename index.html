@@ -408,6 +408,14 @@ const FLYERS_PACK_PRICE=5; // 10 flyers
     let save=migrateSave(loadSave());
     let running=false;
     let paused=false;
+
+    // AUTO-ENABLE EXTRAS (once per save)
+if (save && save.extrasEnabled) {
+  __extrasEnabled = true;
+} else {
+  try { applyExtras(); } catch(e) { console.error(e); }
+}
+
     
     let playerFrownUntil=0; // performance.now() timestamp
     let playerGrinUntil=0; // brief success grin
