@@ -1785,7 +1785,7 @@ ctx.fillStyle='#4c2f17'; ctx.beginPath(); ctx.arc(sx-1,sy-23,10,Math.PI,Math.PI*
         if(o.type==='house') drawHouse(s.x,s.y,o.w,o.h,o.label);
         else if(o.type==='school') drawCivic(s.x,s.y,o.w,o.h,"SCHOOL","#c9d2e6");
         else if(o.type==='church') drawCivic(s.x,s.y,o.w,o.h,"CHURCH","#ead7c0");
-        else if(o.type==='fire') drawCivic(s.x,s.y,o.w,o.h,"FIRE","#e2b2b2");
+        else if(o.type==='fire') drawCivic(s.x,s.y,o.w,o.h,o.label||"FIRE","#e2b2b2");
         else if(o.type==='store') drawCivic(s.x,s.y,o.w,o.h,o.label||"SHOP","#d9d9d9");
         else drawHouse(s.x,s.y,o.w,o.h,o.label);
       }
