@@ -2424,17 +2424,22 @@ function runStartupProgress(durationMs, onDone){
   const startCard = document.getElementById('startCard');
   if(startCard){
     startCard.innerHTML = `
-      <img src="icon-192.png" style="width:96px;height:96px;border-radius:22px;
-        box-shadow:0 6px 18px rgba(0,0,0,.25);margin-bottom:8px;">
-      <div id="title">🦫 Gopher Trapper</div>
-      <div class="small" style="font-size:15px;font-weight:800;line-height:1.4;">
-        Your Town Is Being Overrun By Gophers.<br><br>
-        It Is Your Job To Clean Up Your Town.<br><br>
-        Set Traps At Mounds. Check Traps Tomorrow.<br><br>
-        Speak To Neighbors To Earn Their Business.<br><br>
-        On Day 7, Your Rival Appears.
-      </div>
-    `;
+  <img src="icon-192.png" style="width:96px;height:96px;border-radius:22px;
+    box-shadow:0 6px 18px rgba(0,0,0,.25);margin-bottom:8px;">
+  <div id="title">🦫 Gopher Trapper</div>
+  <div class="small" style="font-size:15px;font-weight:800;line-height:1.4;">
+    Your Town Is Being Overrun By Gophers.<br><br>
+    It Is Your Job To Clean Up Your Town.<br><br>
+    Set Traps At Mounds. Check Traps Tomorrow.<br><br>
+    Speak To Neighbors To Earn Their Business.<br><br>
+    On Day 7, Your Rival Appears.
+  </div>
+
+  <div id="startProgressWrap">
+    <div id="startProgress"></div>
+  </div>
+`;
+
   }
 
   runStartupProgress(10000, ()=>{
