@@ -2136,7 +2136,7 @@ ctx.fillStyle='#4c2f17'; ctx.beginPath(); ctx.arc(sx-1,sy-23,10,Math.PI,Math.PI*
               // Offer to buy property immediately (if not owned)
               if(!save.ownedProps[lotId]){
                 const name=lotName(lotId);
-                const cost = (/fire|station|department|store|church|school/i.test(name)) ? 500 : 100;
+                const cost = (/fire|station|department|store|church|school|diner/i.test(name)) ? 500 : 100;
                 const incomePerDay = (cost===500) ? 50 : 20;
                 showChoice(name, "You have my business, don’t let me down. $"+cost+"?\n(Owned properties earn $"+incomePerDay+" overnight.)", "Buy ($"+cost+")", "No thanks", ()=>{
                   if(save.money < cost){ _toast("Need $"+cost); return; }
