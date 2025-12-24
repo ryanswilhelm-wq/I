@@ -2121,7 +2121,7 @@ ctx.fillStyle='#4c2f17'; ctx.beginPath(); ctx.arc(sx-1,sy-23,10,Math.PI,Math.PI*
                 // Optional property offer if not owned
                 if(!save.ownedProps[lotId]){
                   const name=lotName(lotId);
-                  const cost = (/fire|station|department/i.test(name)) ? 500 : 100;
+                  const cost = (/fire|station|department|store|church|school/i.test(name)) ? 500 : 100;
                   const incomePerDay = (cost===500) ? 50 : 20;
                   showChoice(name, "You have my business, don’t let me down. $"+cost+"?\n(Owned properties earn $"+incomePerDay+" overnight.)", "Buy ($"+cost+")", "No thanks", ()=>{
                     if(save.money < cost){ _toast("Need $"+cost); return; }
@@ -2146,7 +2146,7 @@ ctx.fillStyle='#4c2f17'; ctx.beginPath(); ctx.arc(sx-1,sy-23,10,Math.PI,Math.PI*
               // Offer to buy property immediately (if not owned)
               if(!save.ownedProps[lotId]){
                 const name=lotName(lotId);
-                const cost = (/fire|station|department/i.test(name)) ? 500 : 100;
+                const cost = (/fire|station|department|store|church|school/i.test(name)) ? 500 : 100;
                 const incomePerDay = (cost===500) ? 50 : 20;
                 showChoice(name, "You have my business, don’t let me down. $"+cost+"?\n(Owned properties earn $"+incomePerDay+" overnight.)", "Buy ($"+cost+")", "No thanks", ()=>{
                   if(save.money < cost){ _toast("Need $"+cost); return; }
@@ -2164,7 +2164,7 @@ return;
               e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation();
               const lotId=actionBtn.dataset.lot;
               const name=lotName(lotId);
-              const cost = (/fire|station|department/i.test(name)) ? 500 : 100;
+              const cost = (/fire|station|department|store|church|school/i.test(name)) ? 500 : 100;
               if(save.money < cost){ _toast("Need $"+cost); return; }
               save.money -= cost;
               save.ownedProps[lotId]=true;
@@ -2187,7 +2187,7 @@ return;
                 const lotId=d.lot.id;
                 if(!save.ownedProps[lotId] && actionBtn && actionBtn.dataset.mode!=="gate"){
                   const name=lotName(lotId);
-                  const cost = (/fire|station|department/i.test(name)) ? 500 : 100;
+                  const cost = (/fire|station|department|store|church|school/i.test(name)) ? 500 : 100;
                   actionBtn.textContent = "Buy Property ($"+cost+")";
                   actionBtn.dataset.mode="buyProp";
                   actionBtn.dataset.lot=lotId;
@@ -2212,7 +2212,7 @@ return;
                   for(const pid in save.ownedProps){
                     if(!save.ownedProps[pid]) continue;
                     const pname = lotName(pid);
-                    const pcost = (/fire|station|department/i.test(pname)) ? 500 : 100;
+                    const pcost = (/fire|station|department|store|church|school/i.test(pname)) ? 500 : 100;
                     income += (pcost===500) ? 50 : 20;
                   }
                   save.money += income;
@@ -2356,11 +2356,11 @@ return;
           <img src="icon-192.png" style="width:96px;height:96px;border-radius:22px;
             box-shadow:0 6px 18px rgba(0,0,0,.25);margin-bottom:8px;">
           <div id="title">🦫 Gopher Trapper</div>
-          <div class="small" style="font-size:14px;font-weight:800;line-height:1.4;">
+          <div class="small" style="font-size:15px;font-weight:800;line-height:1.4;">
             Enable extras in the menu.<br><br>
-            Trap gophers and check traps the next day.<br><br>
+            Set Traps at mounds. Check traps the next day.<br><br>
             Earn the business of your neighbors.<br><br>
-            Your rival is also trying to gain customers.<br><br>
+            On day 7, your rival will try to gain customers.<br><br>
             Save up money to purchase properties.
           </div>
           <div class="small" style="margin-top:12px;">Starting…</div>
@@ -2526,7 +2526,7 @@ function showChoice(title, text, okText, cancelText, onOK){
   }
   function lotPrice(L){
     var name=((L && (L.name||L.kind||L.type||L.id))||"").toString().toLowerCase();
-    if(name.includes("fire") || name.includes("station") || name.includes("department")) return 500;
+    if(name.includes("fire") || name.includes("station") || name.includes("department")(name.includes("store") || name.includes("church") || name.includes("grocery")|| name.includes("school")) return 500;
     // you can extend with school/church later if desired
     return 100;
   }
