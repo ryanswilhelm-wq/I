@@ -1755,16 +1755,7 @@ document.getElementById('togglePixel').addEventListener('click', ()=>{
 ctx.fillStyle='#4c2f17'; ctx.beginPath(); ctx.arc(sx-1,sy-23,10,Math.PI,Math.PI*2); ctx.fill();
       ctx.fillStyle='#2c6fd6'; safeFillRoundRect(sx-12,sy-12,24,20,6);
       ctx.fillStyle='#303030'; safeFillRoundRect(sx-11,sy+6,22,10,4);
-    }
-
-    function nearestHole(){ // local override safe
-      let best=-1, bestD=1e9;
-      for(let i=0;i<save.holes.length;i++){
-        const h=save.holes[i];
-        const d=dist(save.player.x,save.player.y,h.x,h.y);
-        if(d<bestD){ bestD=d; best=i; }
-      }
-      return {idx:best, d:bestD};
+  
     }
 
     function drawTown(){
