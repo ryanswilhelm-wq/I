@@ -445,20 +445,26 @@ function setPaused(p){
     }
 
     function addCuldesacNeighborhood(prefix, cx, cy){
-      addRoadRect(cx-80, cy-520, 160, 520);
-      addRoadCircle(cx, cy, 190);
-      const r=360;
-      for(let i=0;i<6;i++){
-        const ang = (i/6)*Math.PI*2 + Math.PI/6;
-        const hx = cx + Math.cos(ang)*r;
-        const hy = cy + Math.sin(ang)*r;
-        const yard = {x:hx-210, y:hy-170, w:420, h:300};
-        const building = {x:hx-120, y:hy-150, w:240, h:160, type:'house'};
-        const door = {x:hx, y:hy-6};
-        const mailbox = {x: hx + Math.cos(ang)*(-140), y: hy + Math.sin(ang)*(-140)};
-        addLot(`${prefix}${i+1}`, `Cul-de-sac Home ${i+1}`, yard, building, door, mailbox, 'house', true);
-      }
-    }
+  addRoadRect(cx-80, cy-520, 160, 520);
+  addRoadCircle(cx, cy, 190);
+  const r=360;
+  for(let i=0;i<6;i++){
+    const ang = (i/6)*Math.PI*2 + Math.PI/6;
+    const hx = cx + Math.cos(ang)*r;
+    const hy = cy + Math.sin(ang)*r;
+    const yard = {x:hx-210, y:hy-170, w:420, h:300};
+    const building = {x:hx-120, y:hy-150, w:240, h:160, type:'house'};
+    const door = {x:hx, y:hy-6};
+    const mailbox = {x: hx + Math.cos(ang)*(-140), y: hy + Math.sin(ang)*(-140)};
+
+    // 🔒 fence permanently disabled
+    addLot(`${prefix}${i+1}`, `Cul-de-sac Home ${i+1}`,
+      yard, building, door, mailbox,
+      "house", false
+    );
+  }
+}
+
 
     function buildTown(){
       lots.length=0; obstacles.length=0; mailboxes.length=0; roads.length=0; trees.length=0;
