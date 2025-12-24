@@ -2322,6 +2322,7 @@ return;
       running=true;
       updatePrices();
       try{ refreshShopButtons(); }catch(e){}
+      try { applyExtras(); } catch(e){}
       requestAnimationFrame(loop);
     }
 
