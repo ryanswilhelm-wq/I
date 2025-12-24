@@ -2383,6 +2383,15 @@ return;
   }, 7000);
 });
 
+function lockStartButtons(lock){
+  const btns = [btnNew, btnContinue];
+  btns.forEach(b=>{
+    if(!b) return;
+    b.disabled = lock;
+    b.style.opacity = lock ? '0.55' : '1';
+    b.style.pointerEvents = lock ? 'none' : 'auto';
+  });
+}
 
   
 bindStart(btnContinue, function(){
