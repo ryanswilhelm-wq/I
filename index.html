@@ -1877,8 +1877,17 @@ ctx.fillStyle='#4c2f17'; ctx.beginPath(); ctx.arc(sx-1,sy-23,10,Math.PI,Math.PI*
     let last=performance.now();
     
     // ===== Optional extras (loaded only after you press Enable Extras in Menu) =====
-    var __extrasEnabled = false;
-    function applyExtras(){
+    // === AUTO-ENABLE EXTRAS AFTER DEFINITION ===
+setTimeout(() => {
+  try {
+    if (typeof applyExtras === 'function' && !__extrasEnabled) {
+      applyExtras();
+    }
+  } catch (e) {
+    console.error("Extras auto-enable failed:", e);
+  }
+}, 0);
+
       if(__extrasEnabled) { showToast("Extras already enabled."); return; }
 
 // === AUTO-ENABLE EXTRAS ON LOAD (NO MENU CLICK REQUIRED) ===
@@ -2379,15 +2388,22 @@ return;
       }
 
       setTimeout(()=>{
-        save=defaultSave(); holeIdCounter=1;
-        buildTown();
-        rebuildNPCs();
-        startDaySpawn(true);
-        spawnAtHomeDriveway();
-        persist();
-        startUI();
-        showToast("Set traps on the 2 holes in your yard.");
-      },7000);
+  save = defaultSave();
+  holeIdCounter = 1;
+
+  // 🔥 FORCE EXTRAS ON FOR NEW GAME
+  __extrasEnabled = false;
+  applyExtras();
+
+  buildTown();
+  rebuildNPCs();
+  startDaySpawn(true);
+  spawnAtHomeDriveway();
+  persist();
+  startUI();
+  showToast("Set traps on the 2 holes in your yard.");
+},7000);
+
     });
 
     /* tapAnywhereStart fallback */
