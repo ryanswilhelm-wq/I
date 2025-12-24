@@ -999,17 +999,17 @@ function randomRivalEvent(){
         }
       }catch(e){}
 
-      // Property buying: starts Day 12, full price, 3-day cooldown
+      // Property buying: starts Day 15, full price, 5-day cooldown
       try{
         save.rival.ownedProps = save.rival.ownedProps || {};
         save.rival.lastPropBuyDay = save.rival.lastPropBuyDay ?? -999;
 
-        if(save.day >= 12 && (save.day - save.rival.lastPropBuyDay) >= 3 && rand01() < 0.35){
+        if(save.day >= 15 && (save.day - save.rival.lastPropBuyDay) >= 5 && rand01() < 0.35){
           const candidates = lots.filter(l=>l.id!=='home' && !save.rival.ownedProps[l.id]).map(l=>l.id);
           if(candidates.length){
             const pick = candidates[Math.floor(rand01()*candidates.length)];
             const name = lotName(pick);
-            const baseCost = (/fire|station|department/i.test(name)) ? 500 : 100;
+            const baseCost = (/fire|station|department|store|church|school/i.test(name)) ? 500 : 100;
             if((save.rival.money||0) >= baseCost){
               save.rival.money -= baseCost;
               save.rival.ownedProps[pick] = true;
