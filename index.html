@@ -2526,7 +2526,7 @@ function showChoice(title, text, okText, cancelText, onOK){
   }
   function lotPrice(L){
     var name=((L && (L.name||L.kind||L.type||L.id))||"").toString().toLowerCase();
-    if(name.includes("fire") || name.includes("station") || name.includes("department")(name.includes("store") || name.includes("church") || name.includes("grocery")|| name.includes("school")) return 500;
+    if(name.includes("fire") || name.includes("station") || name.includes("department")||(name.includes("store") || name.includes("church") || name.includes("grocery")|| name.includes("school")) return 500;
     // you can extend with school/church later if desired
     return 100;
   }
