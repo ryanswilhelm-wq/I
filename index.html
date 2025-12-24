@@ -2592,6 +2592,8 @@ function showChoice(title, text, okText, cancelText, onOK){
     }catch(e){ return false; }
   }
   function lotPrice(name){
+  function lotPrice(lot){
+  const name = (lot && lot.name ? lot.name : "").toLowerCase();
   if (
     name.includes("fire") ||
     name.includes("station") ||
@@ -2601,9 +2603,12 @@ function showChoice(title, text, okText, cancelText, onOK){
     name.includes("grocery") ||
     name.includes("school") ||
     name.includes("diner")
-  ) return 500;
+  ){
+    return 500;
+  }
   return 100;
 }
+
 
   
   function nearestBuyableLot(px,py){
@@ -2944,10 +2949,39 @@ function showChoice(title, text, okText, cancelText, onOK){
 </html>
 
 <script>
-  // NPC_SMILE_TIMEOUT
-  (function(){
-    ...
-  })();
+// NPC_SMILE_TIMEOUT: revert temporary smiles
+(function(){
+  try{
+    setInterval(function(){
+      if(!window.save || !save.npcMood) return;
+      for(const k in save.npcMood){
+        if(save.contracts && save.contracts[k]) continue;
+        if(save.npcMood[k]==='smile'){
+          save.npcMood[k]='neutral';
+        }
+      }
+    }, 1500);
+  }catch(e){}
+})();
 </script>
+</script>
+
+<script>
+// NPC_SMILE_TIMEOUT: revert temporary smiles
+(function(){
+  try{
+    setInterval(function(){
+      if(!window.save || !save.npcMood) return;
+      for(const k in save.npcMood){
+        if(save.contracts && save.contracts[k]) continue;
+        if(save.npcMood[k]==='smile'){
+          save.npcMood[k]='neutral';
+        }
+      }
+    }, 1500);
+  }catch(e){}
+})();
+</script>
+
 </body>
 </html>
