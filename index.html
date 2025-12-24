@@ -1587,7 +1587,7 @@ document.getElementById('togglePixel').addEventListener('click', ()=>{
       ctx.fillStyle=color; ctx.fillRect(sx,sy,w,h);
       ctx.fillStyle='rgba(0,0,0,.12)'; ctx.fillRect(sx,sy,w,24);
       ctx.fillStyle='#7ec8ff';
-      for(let i=0;i<6;i++) ctx.fillRect(sx+30+i*80,sy+44,46,26);
+      for(let i=0;i<5;i++) ctx.fillRect(sx+30+i*80,sy+44,46,26);
       ctx.fillStyle='rgba(0,0,0,.75)'; ctx.font='bold 14px system-ui'; ctx.fillText(label, sx+16, sy+18);
     }
     function drawRoads(){
