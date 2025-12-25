@@ -739,6 +739,31 @@ function rebuildNPCs(){
       const base = (t==='gold') ? GOLD_SUCCESS : (t==='silver') ? SILVER_SUCCESS : BASE_SUCCESS;
       return clamp(base*wx.successMul,0.1,0.95);
     }
+    // === DAILY MOUND / HOLE GUARANTEE ===
+// Ensures every lot (houses + civic) always has mounds
+function ensureDailyMounds(){
+  if(!Array.isArray(lots) || !Array.isArray(save.holes)) return;
+
+  for(const lot of lots){
+    if(!lot || !lot.id) continue;
+
+    // Home gets 2, everything else gets 1
+    const target = (lot.id === 'home') ? 2 : 1;
+
+    let count = 0;
+    for(const h of save.holes){
+      if(h && h.lotId === lot.id) count++;
+    }
+
+    while(count < target){
+      const h = spawnHoleOnLot(lot.id);
+      if(!h) break;
+      save.holes.push(h);
+      count++;
+    }
+  }
+}
+
     function startDaySpawn(isFirst=false){
       save.holes=(save.holes||[]).filter(h=>h.trap && (h.trap.state==='set' || h.trap.state==='ready'));
       save.weather=pickWeather();
