@@ -1245,20 +1245,48 @@ function randomRivalEvent(){
       return {idx:best, d:bestD};
     }
 
-    function ensureFlyersDropped(){ save.flyersDropped=save.flyersDropped||{}; }
+    function ensureFlyersDropped(){ save.flyersDropped=function updateActionLabel(){
 
-    function updateActionLabel(){
-      if(!running || paused){ actionBtn.textContent=""; actionBtn.dataset.mode="none"; const hit = nearestLot();
-const lot = hit ? hit.lot : null;
-const id = lot ? lot.id : null;
-      const g=nearestGate();
-      if(g && g.d<95){
-        const open=gateIsOpen(g.lot.id);
-        actionBtn.textContent = open ? "Close Gate" : "Open Gate";
-        actionBtn.dataset.mode="gate";
-        actionBtn.dataset.lot=g.lot.id;
-        return;
-      }
+  // 1️⃣ Game not running → no action
+  if(!running || paused){
+    actionBtn.textContent = "";
+    actionBtn.dataset.mode = "none";
+    return;
+  }
+
+  // 2️⃣ Gates (keep this if you still want gates)
+  const g = nearestGate();
+  if(g && g.d < 95){
+    const open = gateIsOpen(g.lot.id);
+    actionBtn.textContent = open ? "Close Gate" : "Open Gate";
+    actionBtn.dataset.mode = "gate";
+    actionBtn.dataset.lot = g.lot.id;
+    return;
+  }
+
+  // 3️⃣ Nearest lot (NOT door)
+  const hit = nearestLot();
+  const lot = hit ? hit.lot : null;
+  const id  = lot ? lot.id  : null;
+
+  // 4️⃣ Buy Property (unowned)
+  if(lot && !save.ownedProps[id] && typeof lot.price === "number"){
+    actionBtn.textContent = "Buy Property ($" + lot.price + ")";
+    actionBtn.dataset.mode = "buyProp";
+    return;
+  }
+
+  // 5️⃣ Owned property
+  if(lot && save.ownedProps[id]){
+    actionBtn.textContent = "Owned";
+    actionBtn.dataset.mode = "none";
+    return;
+  }
+
+  // 6️⃣ Fallback
+  actionBtn.textContent = "Action";
+  actionBtn.dataset.mode = "none";
+}
 
         if(save.rivalHold[id]){
           actionBtn.textContent=`Rival (${save.rivalHold[id]}d)`;
