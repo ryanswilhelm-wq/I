@@ -1495,14 +1495,21 @@ function randomRivalEvent(){
         mini.fillStyle='rgba(240,210,60,.95)';
         mini.fillRect((l.yard.x+l.yard.w/2)/WORLD_W*w-2, (l.yard.y+l.yard.h/2)/WORLD_H*h-2, 4, 4);
       }
-      for(const ho of save.holes){
-        mini.fillStyle = ho.trap?.state==='ready' ? (ho.trap.success?'rgba(40,200,80,.9)':'rgba(255,80,80,.9)') :
-                        ho.trap?.state==='set' ? 'rgba(230,230,230,.9)':'rgba(90,40,15,.9)';
-        mini.fillRect(ho.x/WORLD_W*w, ho.y/WORLD_H*h, 2, 2);
-      }
-      mini.fillStyle='#2c6fd6';
-      mini.fillRect(save.player.x/WORLD_W*w-2, save.player.y/WORLD_H*h-2, 4, 4);
-    }
+     for(const ho of save.holes){
+  mini.fillStyle =
+    ho.trap?.state === 'ready'
+      ? 'rgba(212,175,55,.95)'   // GOLD for unchecked traps
+      : ho.trap?.state === 'set'
+        ? 'rgba(230,230,230,.9)' // trap placed today
+        : 'rgba(90,40,15,.9)';   // no trap
+
+  mini.fillRect(
+    ho.x / WORLD_W * w,
+    ho.y / WORLD_H * h,
+    2, 2
+  );
+}
+
 
     // menu actions
     menuBtn.addEventListener('click', ()=>{ if(paused) return; menuPanel.style.display=(menuPanel.style.display==='block')?'none':'block'; });
