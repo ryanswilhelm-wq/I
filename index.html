@@ -1245,85 +1245,41 @@ function randomRivalEvent(){
       return {idx:best, d:bestD};
     }
 
-  function ensureFlyersDropped(){
-  if(!save.flyersDropped) save.flyersDropped = {};
-}
+    function ensureFlyersDropped(){ save.flyersDropped=save.flyersDropped||{}; }
 
-function updateActionLabel(){
+    function updateActionLabel(){
+      if(!running || paused){ actionBtn.textContent=""; actionBtn.dataset.mode="none"; return; }
 
-  // 1️⃣ Game not running / paused
-  if(!running || paused){
-    actionBtn.textContent = "";
-    actionBtn.dataset.mode = "none";
-    return;
-  }
+      const g=nearestGate();
+      if(g && g.d<95){
+        const open=gateIsOpen(g.lot.id);
+        actionBtn.textContent = open ? "Close Gate" : "Open Gate";
+        actionBtn.dataset.mode="gate";
+        actionBtn.dataset.lot=g.lot.id;
+        return;
+      }
 
-  // 2️⃣ Gates (keep if gates still exist)
-  const g = nearestGate && nearestGate();
-  if(g && g.d < 95){
-    const open = gateIsOpen(g.lot.id);
-    actionBtn.textContent = open ? "Close Gate" : "Open Gate";
-    actionBtn.dataset.mode = "gate";
-    actionBtn.dataset.lot = g.lot.id;
-    return;
-  }
-
-  // 3️⃣ Find nearest LOT (yard-based, not door-based)
-  let hit = null;
-  let bestD = 1e9;
-
-  for(const lot of lots){
-    if(!lot.yard) continue;
-    const cx = lot.yard.x + lot.yard.w/2;
-    const cy = lot.yard.y + lot.yard.h/2;
-    const d  = dist(save.player.x, save.player.y, cx, cy);
-    if(d < bestD){
-      bestD = d;
-      hit = { lot, d };
-    }
-  }
-
-  const lot = hit && hit.d < 120 ? hit.lot : null;
-  const id  = lot ? lot.id : null;
-
-  // Default fallback
-  actionBtn.textContent = "Action";
-  actionBtn.dataset.mode = "none";
-
-  if(!lot || !id) return;
-
-  // 4️⃣ Rival hold (highest priority)
-  if(save.rivalHold && save.rivalHold[id]){
-    actionBtn.textContent = `Rival (${save.rivalHold[id]}d)`;
-    actionBtn.dataset.mode = "none";
-    return;
-  }
-
-  // 5️⃣ Lead available (talk to sign)
-  if(save.leads && save.leads[id]){
-    actionBtn.textContent = "Talk (Sign Contract)";
-    actionBtn.dataset.mode = "sign";
-    actionBtn.dataset.lot = id;
-    return;
-  }
-
-  // 6️⃣ Buy Property (unowned)
-  if(!save.ownedProps[id]){
-    const cost =
-      /fire|station|department|church|school|store|grocery|diner/i.test(lot.name)
-        ? 500
-        : 100;
-
-    actionBtn.textContent = `Buy Property ($${cost})`;
-    actionBtn.dataset.mode = "buyProp";
-    actionBtn.dataset.lot = id;
-    return;
-  }
-
-  // 7️⃣ Owned property
-  actionBtn.textContent = "Owned";
-  actionBtn.dataset.mode = "none";
-}
+      const d=nearestDoor();
+      if(d && d.d<95){
+        const id=d.lot.id;
+        if(save.contracts[id]){
+          ensureCustomer(id);
+          actionBtn.textContent = (id==='home') ? "Say Hi" : `Talk (${save.customers[id].sat}%)`;
+          actionBtn.dataset.mode="doorInfo";
+          actionBtn.dataset.lot=id;
+          return;
+        }
+        if(save.rivalHold[id]){
+          actionBtn.textContent=`Rival (${save.rivalHold[id]}d)`;
+          actionBtn.dataset.mode="none";
+          return;
+        }
+        if(save.leads[id]){
+          actionBtn.textContent="Talk (Sign Contract)";
+          actionBtn.dataset.mode="sign";
+          actionBtn.dataset.lot=id;
+          return;
+        }
 
       const mb=nearestMailbox();
       if(mb && mb.d<95){
@@ -1369,6 +1325,25 @@ function updateActionLabel(){
         return;
       }
 
+      if(mode==="sign"){
+        const lotId=actionBtn.dataset.lot;
+        if(save.rivalHold[lotId]){ showToast("Rival still has them."); return; }
+        if(!save.leads[lotId]){ showToast("No lead yet."); return; }
+        save.contracts[lotId]=true;
+        ensureCustomer(lotId);
+        delete save.leads[lotId];
+        setNpcMood(lotId,'smile');
+        showToast(`✅ Contract signed with ${lotName(lotId)}!`);
+        return;
+      }
+
+      if(mode==="doorInfo"){
+        const lotId=actionBtn.dataset.lot;
+        ensureCustomer(lotId);
+        if(lotId==='home'){ showToast("Mom: 'Don’t forget to check your traps tomorrow!'"); return; }
+        showToast(`${lotName(lotId)} satisfaction: ${save.customers[lotId].sat}%`);
+        return;
+      }
 
 
       if(mode==="hole"){
@@ -2677,7 +2652,9 @@ function showChoice(title, text, okText, cancelText, onOK){
       // do NOT override it. This prevents the "first trap" glitch where the patch
       // hides or rewrites the Action button right as you try to set a trap.
       var coreMode = btn.dataset.mode || '';
-      // Buy Property ALWAYS wins
+      if(coreMode && coreMode!=='none' && coreMode!=='npcTalk' && coreMode!=='buyProp'){
+        return;
+      }
 
       var px=save.player.x, py=save.player.y;
 
