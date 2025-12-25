@@ -1248,9 +1248,9 @@ function randomRivalEvent(){
     function ensureFlyersDropped(){ save.flyersDropped=save.flyersDropped||{}; }
 
     function updateActionLabel(){
-      if(!running || paused){ actionBtn.textContent=""; actionBtn.dataset.mode="none"; return; }
-      const d = nearestDoor();
-const id = d ? d.lot.id : null;
+      if(!running || paused){ actionBtn.textContent=""; actionBtn.dataset.mode="none"; const hit = nearestLot();
+const lot = hit ? hit.lot : null;
+const id = lot ? lot.id : null;
       const g=nearestGate();
       if(g && g.d<95){
         const open=gateIsOpen(g.lot.id);
