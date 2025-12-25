@@ -1251,15 +1251,15 @@ function randomRivalEvent(){
 
 function updateActionLabel(){
 
-  // 1️⃣ Game not running → no action
+  // 1️⃣ Game not running / paused
   if(!running || paused){
     actionBtn.textContent = "";
     actionBtn.dataset.mode = "none";
     return;
   }
 
-  // 2️⃣ Gates (keep this if you still want gates)
-  const g = nearestGate();
+  // 2️⃣ Gates (keep if gates still exist)
+  const g = nearestGate && nearestGate();
   if(g && g.d < 95){
     const open = gateIsOpen(g.lot.id);
     actionBtn.textContent = open ? "Close Gate" : "Open Gate";
@@ -1268,41 +1268,62 @@ function updateActionLabel(){
     return;
   }
 
-  // 3️⃣ Nearest lot (NOT door)
-  const hit = nearestLot();
-  const lot = hit ? hit.lot : null;
-  const id  = lot ? lot.id  : null;
+  // 3️⃣ Find nearest LOT (yard-based, not door-based)
+  let hit = null;
+  let bestD = 1e9;
 
-  // 4️⃣ Buy Property (unowned)
-  if(lot && !save.ownedProps[id] && typeof lot.price === "number"){
-    actionBtn.textContent = "Buy Property ($" + lot.price + ")";
-    actionBtn.dataset.mode = "buyProp";
-    return;
+  for(const lot of lots){
+    if(!lot.yard) continue;
+    const cx = lot.yard.x + lot.yard.w/2;
+    const cy = lot.yard.y + lot.yard.h/2;
+    const d  = dist(save.player.x, save.player.y, cx, cy);
+    if(d < bestD){
+      bestD = d;
+      hit = { lot, d };
+    }
   }
 
-  // 5️⃣ Owned property
-  if(lot && save.ownedProps[id]){
-    actionBtn.textContent = "Owned";
+  const lot = hit && hit.d < 120 ? hit.lot : null;
+  const id  = lot ? lot.id : null;
+
+  // Default fallback
+  actionBtn.textContent = "Action";
+  actionBtn.dataset.mode = "none";
+
+  if(!lot || !id) return;
+
+  // 4️⃣ Rival hold (highest priority)
+  if(save.rivalHold && save.rivalHold[id]){
+    actionBtn.textContent = `Rival (${save.rivalHold[id]}d)`;
     actionBtn.dataset.mode = "none";
     return;
   }
 
-  // 6️⃣ Fallback
-  actionBtn.textContent = "Action";
+  // 5️⃣ Lead available (talk to sign)
+  if(save.leads && save.leads[id]){
+    actionBtn.textContent = "Talk (Sign Contract)";
+    actionBtn.dataset.mode = "sign";
+    actionBtn.dataset.lot = id;
+    return;
+  }
+
+  // 6️⃣ Buy Property (unowned)
+  if(!save.ownedProps[id]){
+    const cost =
+      /fire|station|department|church|school|store|grocery|diner/i.test(lot.name)
+        ? 500
+        : 100;
+
+    actionBtn.textContent = `Buy Property ($${cost})`;
+    actionBtn.dataset.mode = "buyProp";
+    actionBtn.dataset.lot = id;
+    return;
+  }
+
+  // 7️⃣ Owned property
+  actionBtn.textContent = "Owned";
   actionBtn.dataset.mode = "none";
 }
-
-        if(save.rivalHold[id]){
-          actionBtn.textContent=`Rival (${save.rivalHold[id]}d)`;
-          actionBtn.dataset.mode="none";
-          return;
-        }
-        if(save.leads[id]){
-          actionBtn.textContent="Talk (Sign Contract)";
-          actionBtn.dataset.mode="sign";
-          actionBtn.dataset.lot=id;
-          return;
-        }
 
       const mb=nearestMailbox();
       if(mb && mb.d<95){
