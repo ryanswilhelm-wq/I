@@ -1315,25 +1315,6 @@ function randomRivalEvent(){
         return;
       }
 
-      if(mode==="sign"){
-        const lotId=actionBtn.dataset.lot;
-        if(save.rivalHold[lotId]){ showToast("Rival still has them."); return; }
-        if(!save.leads[lotId]){ showToast("No lead yet."); return; }
-        save.contracts[lotId]=true;
-        ensureCustomer(lotId);
-        delete save.leads[lotId];
-        setNpcMood(lotId,'smile');
-        showToast(`✅ Contract signed with ${lotName(lotId)}!`);
-        return;
-      }
-
-      if(mode==="doorInfo"){
-        const lotId=actionBtn.dataset.lot;
-        ensureCustomer(lotId);
-        if(lotId==='home'){ showToast("Mom: 'Don’t forget to check your traps tomorrow!'"); return; }
-        showToast(`${lotName(lotId)} satisfaction: ${save.customers[lotId].sat}%`);
-        return;
-      }
 
 
       if(mode==="hole"){
