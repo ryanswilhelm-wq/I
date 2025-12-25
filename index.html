@@ -1,4 +1,5 @@
-<!doctype html><html lang="en">
+Turn this into a code I can put into GitHub  <!doctype html>
+<html lang="en">
 <head>
 <meta charset="utf-8" />
 <title>Gopher Trapper</title>
@@ -88,7 +89,9 @@
   margin-bottom:8px;
 ">
 <div id="title">🦫 Gopher Trapper</div>
-    <div id="subtitle">Trap Gophers And Control The Population
+    <div id="subtitle">Trap Gophers To Earn Money • Gain Customers • Upgrade Traps and Purchase Properties</div>
+    <button id="btnNew">Start New Game</button>
+    <button class="secondary" id="btnContinue">Continue</button>
 <div class="small">v14.0 — Simplified UI & NPC flow</div>
   </div>
 </div>
@@ -441,27 +444,21 @@ function setPaused(p){
       if(mailbox) mailboxes.push({lotId:id,x:mailbox.x,y:mailbox.y});
     }
 
-  function addCuldesacNeighborhood(prefix, cx, cy){
-  addRoadRect(cx-80, cy-520, 160, 520);
-  addRoadCircle(cx, cy, 190);
-  const r=360;
-  for(let i=0;i<6;i++){
-    const ang = (i/6)*Math.PI*2 + Math.PI/6;
-    const hx = cx + Math.cos(ang)*r;
-    const hy = cy + Math.sin(ang)*r;
-    const yard = {x:hx-210, y:hy-170, w:420, h:300};
-    const building = {x:hx-120, y:hy-150, w:240, h:160, type:'house'};
-    const door = {x:hx, y:hy-6};
-    const mailbox = {x: hx + Math.cos(ang)*(-140), y: hy + Math.sin(ang)*(-140)};
-
-    // 🔒 fence permanently disabled
-    addLot(`${prefix}${i+1}`, `Cul-de-sac Home ${i+1}`,
-      yard, building, door, mailbox,
-      "house", false
-    );
-  }
-}
-
+    function addCuldesacNeighborhood(prefix, cx, cy){
+      addRoadRect(cx-80, cy-520, 160, 520);
+      addRoadCircle(cx, cy, 190);
+      const r=360;
+      for(let i=0;i<6;i++){
+        const ang = (i/6)*Math.PI*2 + Math.PI/6;
+        const hx = cx + Math.cos(ang)*r;
+        const hy = cy + Math.sin(ang)*r;
+        const yard = {x:hx-210, y:hy-170, w:420, h:300};
+        const building = {x:hx-120, y:hy-150, w:240, h:160, type:'house'};
+        const door = {x:hx, y:hy-6};
+        const mailbox = {x: hx + Math.cos(ang)*(-140), y: hy + Math.sin(ang)*(-140)};
+        addLot(`${prefix}${i+1}`, `Cul-de-sac Home ${i+1}`, yard, building, door, mailbox, 'house', true);
+      }
+    }
 
     function buildTown(){
       lots.length=0; obstacles.length=0; mailboxes.length=0; roads.length=0; trees.length=0;
@@ -2326,8 +2323,6 @@ return;
       running=true;
       updatePrices();
       try{ refreshShopButtons(); }catch(e){}
-      try { applyExtras(); } catch(e){}
-      document.getElementById('enableExtras').style.display = 'none';
       requestAnimationFrame(loop);
     }
 
@@ -2356,13 +2351,12 @@ return;
           <img src="icon-192.png" style="width:96px;height:96px;border-radius:22px;
             box-shadow:0 6px 18px rgba(0,0,0,.25);margin-bottom:8px;">
           <div id="title">🦫 Gopher Trapper</div>
-          <div class="small" style="font-size:16px;font-weight:800;line-height:1.4;">
-            Your Town Is Being Overrun By Gophers.<br><br>
-            It Is Up To You To Control Their Population. <br><br>
-            Trap Gophers And Earn Money. <br><br>
-            Earn The Business Of Your Neighbors.<br><br>
-            On Day 7, Your Rival Will Try To Gain Customers To Compete With You.<br><br>
-            Save Up Money To Upgrade Traps And Purchase Properties. <br><br>
+          <div class="small" style="font-size:15px;font-weight:800;line-height:1.4;">
+            Enable extras in the menu.<br><br>
+            Set Traps at mounds. Check traps the next day.<br><br>
+            Earn the business of your neighbors.<br><br>
+            On day 7, your rival will try to gain customers.<br><br>
+            Save up money to purchase properties.
           </div>
           <div class="small" style="margin-top:12px;">Starting…</div>
         `;
@@ -2377,10 +2371,25 @@ return;
         persist();
         startUI();
         showToast("Set traps on the 2 holes in your yard.");
-      },10000);
+      },7000);
     });
 
-
+    /* tapAnywhereStart fallback */
+(function(){
+  try{
+    var startRoot=document.getElementById('startScreen');
+    if(!startRoot) return;
+    var fired=false;
+    function maybeStart(){
+      if(fired) return;
+      fired=true;
+      try{ if(btnContinue && !btnContinue.disabled) btnContinue.click(); else if(btnNew) btnNew.click(); }catch(e){}
+      setTimeout(function(){ fired=false; }, 500);
+    }
+    startRoot.addEventListener('pointerdown', function(e){ try{ e.preventDefault(); }catch(_){} maybeStart(); }, {passive:false});
+    startRoot.addEventListener('touchstart', function(e){ try{ e.preventDefault(); }catch(_){} maybeStart(); }, {passive:false});
+  }catch(e){}
+})();
 bindStart(btnContinue, function(){
       save=migrateSave(loadSave() || save);
       buildTown();
@@ -2853,6 +2862,11 @@ function showChoice(title, text, okText, cancelText, onOK){
     </div>
   </div>
 </div>
+
+</body>
+
+</html>
+
 <script>
 // NPC_SMILE_TIMEOUT: revert temporary smiles
 (function(){
@@ -2869,7 +2883,4 @@ function showChoice(title, text, okText, cancelText, onOK){
     }, 1500);
   }catch(e){}
 })();
-</body>
-
-</html>
-
+</script> 
