@@ -139,7 +139,7 @@
   💰 <b>$<span id="money">0</span></b> &nbsp;|&nbsp;
   🦫 <b><span id="gophers">0</span></b> &nbsp;|&nbsp;
   🪤 Traps <b><span id="traps">2</span></b> &nbsp;|&nbsp;
-  <span>⏳ Unchecked <b id="unchecked">0</b></span>
+ <span>🪤 Unchecked <b id="unchecked">0</b></span>
   Customers <b><span id="cust">1</span></b> &nbsp;|&nbsp;
   Day <b><span id="day">1</span></b> &nbsp;|&nbsp;
   Time <b><span id="time">5:00</span></b> &nbsp;|&nbsp;
@@ -1369,18 +1369,32 @@ function countUncheckedTraps(){
   }
   return n;
 }
+function countUncheckedTraps(){
+  if(!Array.isArray(traps)) return 0;
+
+  let n = 0;
+  for(const t of traps){
+    // THIS MUST MATCH YOUR CHECK LOGIC
+    if(t && t.trap && t.resolved && !t.collected){
+      n++;
+    }
+  }
+  return n;
+}
 
 
-    function updateHud(){
+   function updateHud(){
   document.getElementById('money').textContent=Math.floor(save.money);
   document.getElementById('gophers').textContent=save.gophers;
   document.getElementById('traps').textContent=(save.trapsInv + (save.silverTraps||0) + (save.goldTraps||0) + (save.platinumTraps||0));
-  document.getElementById('unchecked').textContent=countUncheckedTraps(); // ← NEW
+  document.getElementById('unchecked').textContent=countUncheckedTraps(); // ← HERE
   document.getElementById('cust').textContent=Object.keys(save.contracts||{}).length;
   document.getElementById('day').textContent=save.day;
   document.getElementById('time').textContent=formatClock(save.daySecondsLeft);
   document.getElementById('wx').textContent=(WX[save.weather]||WX.clear).label;
 }
+
+
 
 
     function updatePrices(){
