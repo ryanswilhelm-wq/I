@@ -1358,13 +1358,18 @@ function randomRivalEvent(){
     custClose.addEventListener('click', closeCustomers);
     
 function countUncheckedTraps(){
-  if(!Array.isArray(traps)) return 0;   // ← THIS FIXES IT
+  if(!Array.isArray(traps)) return 0;
+
   let n = 0;
   for(const t of traps){
-    if(!t.checked) n++;
+    // trap is placed AND waiting to be checked
+    if(t.hasTrap && !t.checked){
+      n++;
+    }
   }
   return n;
 }
+
 
     function updateHud(){
   document.getElementById('money').textContent=Math.floor(save.money);
