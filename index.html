@@ -1382,17 +1382,27 @@ function countUncheckedTraps(){
   return n;
 }
 
+function countUncheckedTraps(){
+  if(!Array.isArray(holes)) return 0;
 
-   function updateHud(){
+  let n = 0;
+  for(const h of holes){
+    if(h.trap) n++;
+  }
+  return n;
+}
+
+ function updateHud(){
   document.getElementById('money').textContent=Math.floor(save.money);
   document.getElementById('gophers').textContent=save.gophers;
   document.getElementById('traps').textContent=(save.trapsInv + (save.silverTraps||0) + (save.goldTraps||0) + (save.platinumTraps||0));
-  document.getElementById('unchecked').textContent=countUncheckedTraps(); // ← HERE
+  document.getElementById('unchecked').textContent=countUncheckedTraps(); // ← THIS
   document.getElementById('cust').textContent=Object.keys(save.contracts||{}).length;
   document.getElementById('day').textContent=save.day;
   document.getElementById('time').textContent=formatClock(save.daySecondsLeft);
   document.getElementById('wx').textContent=(WX[save.weather]||WX.clear).label;
 }
+
 
 
 
