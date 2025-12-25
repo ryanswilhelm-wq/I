@@ -1389,7 +1389,10 @@ function countUncheckedTraps(){
   for(const lot of lots){
     if(!Array.isArray(lot.holes)) continue;
     for(const h of lot.holes){
-      if(h.trap) n++;
+      // MUST MATCH your "Check Trap" condition
+      if(h.trap && h.result){
+        n++;
+      }
     }
   }
   return n;
