@@ -1279,10 +1279,13 @@ function randomRivalEvent(){
           actionBtn.dataset.lot=id;
           return;
         }
-        actionBtn.textContent="Knock (No Lead)";
-        actionBtn.dataset.mode="knock";
-        actionBtn.dataset.lot=id;
-        return;
+        const name = lotName(id);
+const cost = (/fire|station|department|store|church|school|diner/i.test(name)) ? 500 : 100;
+
+actionBtn.textContent = `Buy Property ($${cost})`;
+actionBtn.dataset.mode = "buyProp";
+actionBtn.dataset.lot = id;
+return;
       }
 
       const mb=nearestMailbox();
