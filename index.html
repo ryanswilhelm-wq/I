@@ -1245,7 +1245,11 @@ function randomRivalEvent(){
       return {idx:best, d:bestD};
     }
 
-    function ensureFlyersDropped(){ save.flyersDropped=}function updateActionLabel(){
+   function ensureFlyersDropped(){
+  if(!save.flyersDropped) save.flyersDropped = {};
+}
+
+function updateActionLabel(){
 
   // 1️⃣ Game not running → no action
   if(!running || paused){
