@@ -1248,16 +1248,110 @@ function randomRivalEvent(){
     function ensureFlyersDropped(){ save.flyersDropped=save.flyersDropped||{}; }
 
     function updateActionLabel(){
-      if(!running || paused){ actionBtn.textContent=""; actionBtn.dataset.mode="none"; return; }
 
-      const g=nearestGate();
-      if(g && g.d<95){
-        const open=gateIsOpen(g.lot.id);
-        actionBtn.textContent = open ? "Close Gate" : "Open Gate";
-        actionBtn.dataset.mode="gate";
-        actionBtn.dataset.lot=g.lot.id;
-        return;
-      }
+  // 1️⃣ Game not running / paused
+  if(!running || paused){
+    actionBtn.textContent = "";
+    actionBtn.dataset.mode = "none";
+    return;
+  }
+
+  // 2️⃣ Gates (kept for compatibility)
+  const g = nearestGate && nearestGate();
+  if(g && g.d < 95){
+    const open = gateIsOpen(g.lot.id);
+    actionBtn.textContent = open ? "Close Gate" : "Open Gate";
+    actionBtn.dataset.mode = "gate";
+    actionBtn.dataset.lot = g.lot.id;
+    return;
+  }
+
+  // 3️⃣ Find nearest LOT (yard-based)
+  let hit = null;
+  let bestD = 1e9;
+
+  for(const lot of lots){
+    if(!lot.yard) continue;
+    const cx = lot.yard.x + lot.yard.w/2;
+    const cy = lot.yard.y + lot.yard.h/2;
+    const d  = dist(save.player.x, save.player.y, cx, cy);
+    if(d < bestD){
+      bestD = d;
+      hit = { lot, d };
+    }
+  }
+
+  const lot = (hit && hit.d < 120) ? hit.lot : null;
+  const id  = lot ? lot.id : null;
+
+  // Default state
+  actionBtn.textContent = "Action";
+  actionBtn.dataset.mode = "none";
+  delete actionBtn.dataset.lot;
+  delete actionBtn.dataset.idx;
+
+  if(!lot || !id) return;
+
+  // 4️⃣ Rival hold
+  if(save.rivalHold && save.rivalHold[id]){
+    actionBtn.textContent = `Rival (${save.rivalHold[id]}d)`;
+    return;
+  }
+
+  // 5️⃣ Lead available
+  if(save.leads && save.leads[id]){
+    actionBtn.textContent = "Talk (Sign Contract)";
+    actionBtn.dataset.mode = "sign";
+    actionBtn.dataset.lot = id;
+    return;
+  }
+
+  // 6️⃣ Buy Property
+  if(!save.ownedProps || !save.ownedProps[id]){
+    const cost =
+      /fire|station|department|church|school|store|grocery|diner/i.test(lot.name)
+        ? 500
+        : 100;
+
+    actionBtn.textContent = `Buy Property ($${cost})`;
+    actionBtn.dataset.mode = "buyProp";
+    actionBtn.dataset.lot = id;
+    return;
+  }
+
+  // 7️⃣ Owned
+  actionBtn.textContent = "Owned";
+
+  // 8️⃣ Mailbox (NOW INSIDE FUNCTION ✅)
+  const mb = nearestMailbox();
+  if(mb && mb.d < 95){
+    const lotId = mb.m.lotId;
+    if(
+      !save.contracts[lotId] &&
+      !save.leads[lotId] &&
+      !save.rivalHold[lotId] &&
+      save.flyers > 0 &&
+      save.money >= FLYER_DELIVERY_COST
+    ){
+      actionBtn.textContent = `Drop Flyer (-$${FLYER_DELIVERY_COST})`;
+      actionBtn.dataset.mode = "flyer";
+      actionBtn.dataset.lot = lotId;
+      return;
+    }
+  }
+
+  // 9️⃣ Holes / traps
+  const near = nearestHole();
+  if(near.idx !== -1 && near.d < 85){
+    const h = save.holes[near.idx];
+    if(h.trap?.state === 'ready') actionBtn.textContent = "Check Trap";
+    else if(h.trap?.state === 'set') actionBtn.textContent = "Trap Set";
+    else actionBtn.textContent = "Set Trap";
+    actionBtn.dataset.mode = "hole";
+    actionBtn.dataset.idx = String(near.idx);
+    return;
+  }
+}
 
       const d=nearestDoor();
       if(d && d.d<95){
