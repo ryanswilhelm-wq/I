@@ -1167,7 +1167,7 @@ function randomRivalEvent(){
         const scaled=Math.max(1, Math.round(base*wx.holesMul));
         for(let i=0;i<scaled;i++){ const h=spawnHoleOnLot(id); if(h) save.holes.push(h); }
       }
-
+      ensureDailyMounds();
       spawnAtHomeDriveway();
       persist();
 
@@ -2810,7 +2810,8 @@ function showChoice(title, text, okText, cancelText, onOK){
       if(lastDay===null) lastDay=save.day;
       if(save.day !== lastDay){
         lastDay=save.day;
-        respawnAllLots();
+        // respawnAllLots(); // DISABLED — handled in endDay()
+
       }
     }catch(e){}
   }, 140);
