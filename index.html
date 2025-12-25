@@ -1373,41 +1373,7 @@ function randomRivalEvent(){
     custClose.addEventListener('click', closeCustomers);
     
 
-  let n = 0;
-  for(const t of traps){
-    // trap has resolved AND player hasn't checked it yet
-    if(t.result != null && !t.checked){
-      n++;
-    }
-  }
-  return n;
-}
-
-
-  let n = 0;
-  for(const t of traps){
-    // THIS MUST MATCH YOUR CHECK LOGIC
-    if(t && t.trap && t.resolved && !t.collected){
-      n++;
-    }
-  }
-  return n;
-}
-
-
-
-  let n = 0;
-  for(const lot of lots){
-    if(!Array.isArray(lot.holes)) continue;
-    for(const h of lot.holes){
-      // MUST MATCH your "Check Trap" condition
-      if(h.trap && h.result){
-        n++;
-      }
-    }
-  }
-  return n;
-}
+  
 
  function updateHud(){
   document.getElementById('money').textContent=Math.floor(save.money);
