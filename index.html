@@ -1291,6 +1291,18 @@ function randomRivalEvent(){
   delete actionBtn.dataset.idx;
 
   if(!lot || !id) return;
+  // 🪤 PRIORITY: Trap / Hole interaction (must come FIRST)
+const near = nearestHole();
+if(near.idx !== -1 && near.d < 85){
+  const h = save.holes[near.idx];
+  if(h.trap?.state === 'ready') actionBtn.textContent = "Check Trap";
+  else if(h.trap?.state === 'set') actionBtn.textContent = "Trap Set";
+  else actionBtn.textContent = "Set Trap";
+
+  actionBtn.dataset.mode = "hole";
+  actionBtn.dataset.idx = String(near.idx);
+  return;
+}   
 
   // 4️⃣ Rival hold
   if(save.rivalHold && save.rivalHold[id]){
@@ -1340,17 +1352,6 @@ function randomRivalEvent(){
     }
   }
 
-  // 9️⃣ Holes / traps
-  const near = nearestHole();
-  if(near.idx !== -1 && near.d < 85){
-    const h = save.holes[near.idx];
-    if(h.trap?.state === 'ready') actionBtn.textContent = "Check Trap";
-    else if(h.trap?.state === 'set') actionBtn.textContent = "Trap Set";
-    else actionBtn.textContent = "Set Trap";
-    actionBtn.dataset.mode = "hole";
-    actionBtn.dataset.idx = String(near.idx);
-    return;
-  }
 }
 
       const d=nearestDoor();
