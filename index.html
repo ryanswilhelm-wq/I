@@ -1358,6 +1358,7 @@ function randomRivalEvent(){
     custClose.addEventListener('click', closeCustomers);
     
 function countUncheckedTraps(){
+  if(!Array.isArray(traps)) return 0;   // ← THIS FIXES IT
   let n = 0;
   for(const t of traps){
     if(!t.checked) n++;
