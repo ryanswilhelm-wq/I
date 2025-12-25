@@ -456,7 +456,7 @@ function setPaused(p){
         const building = {x:hx-120, y:hy-150, w:240, h:160, type:'house'};
         const door = {x:hx, y:hy-6};
         const mailbox = {x: hx + Math.cos(ang)*(-140), y: hy + Math.sin(ang)*(-140)};
-        addLot(`${prefix}${i+1}`, `Cul-de-sac Home ${i+1}`, yard, building, door, mailbox, 'house', true);
+        addLot(`${prefix}${i+1}`, `Cul-de-sac Home ${i+1}`, yard, building, door, mailbox, 'house', false);
       }
     }
 
@@ -2323,6 +2323,8 @@ return;
       running=true;
       updatePrices();
       try{ refreshShopButtons(); }catch(e){}
+      try { applyExtras(); } catch(e){}
+      document.getElementById('enableExtras').style.display = 'none';
       requestAnimationFrame(loop);
     }
 
@@ -2374,22 +2376,7 @@ return;
       },7000);
     });
 
-    /* tapAnywhereStart fallback */
-(function(){
-  try{
-    var startRoot=document.getElementById('startScreen');
-    if(!startRoot) return;
-    var fired=false;
-    function maybeStart(){
-      if(fired) return;
-      fired=true;
-      try{ if(btnContinue && !btnContinue.disabled) btnContinue.click(); else if(btnNew) btnNew.click(); }catch(e){}
-      setTimeout(function(){ fired=false; }, 500);
-    }
-    startRoot.addEventListener('pointerdown', function(e){ try{ e.preventDefault(); }catch(_){} maybeStart(); }, {passive:false});
-    startRoot.addEventListener('touchstart', function(e){ try{ e.preventDefault(); }catch(_){} maybeStart(); }, {passive:false});
-  }catch(e){}
-})();
+  
 bindStart(btnContinue, function(){
       save=migrateSave(loadSave() || save);
       buildTown();
