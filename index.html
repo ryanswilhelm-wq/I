@@ -2399,7 +2399,6 @@ function startStartupProgress(durationMs){
 }
 
  bindStart(btnNew, function(){
-  const startScreen = document.getElementById('startScreen');
   const startCard = document.getElementById('startCard');
 
   if(startCard){
@@ -2419,8 +2418,8 @@ function startStartupProgress(durationMs){
     `;
   }
 
-  // START PROGRESS BAR (7 seconds)
-  startStartupProgress(7000);
+  // Start progress bar (10 seconds)
+  startStartupProgress(10000);
 
   setTimeout(()=>{
     save = defaultSave();
@@ -2436,17 +2435,7 @@ function startStartupProgress(durationMs){
 });
 
 
-      setTimeout(()=>{
-        save=defaultSave(); holeIdCounter=1;
-        buildTown();
-        rebuildNPCs();
-        startDaySpawn(true);
-        spawnAtHomeDriveway();
-        persist();
-        startUI();
-        showToast("Set traps on the 2 holes in your yard.");
-      },10000);
-    });
+
 
   
 bindStart(btnContinue, function(){
