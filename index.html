@@ -1362,8 +1362,8 @@ function countUncheckedTraps(){
 
   let n = 0;
   for(const t of traps){
-    // trap is placed AND waiting to be checked
-    if(t.hasTrap && !t.checked){
+    // trap has resolved AND player hasn't checked it yet
+    if(t.result != null && !t.checked){
       n++;
     }
   }
