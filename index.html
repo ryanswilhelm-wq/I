@@ -1280,11 +1280,6 @@ function randomRivalEvent(){
           actionBtn.dataset.lot=id;
           return;
         }
-        actionBtn.textContent="Knock (No Lead)";
-        actionBtn.dataset.mode="knock";
-        actionBtn.dataset.lot=id;
-        return;
-      }
 
       const mb=nearestMailbox();
       if(mb && mb.d<95){
