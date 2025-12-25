@@ -1,0 +1,2964 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Gopher Trapper</title>
+<!-- cache-bust v17.7-civic-align-500px-v17.8-20251223-20251223 -->
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="theme-color" content="#4caf50" />
+<link rel="manifest" href="manifest.json" />
+<style>
+  :root{--green:#4caf50;--ui:#fff;--shadow:rgba(0,0,0,.22);--dark:#2f2f2f;}
+  html,body{height:100%; width:100%;}
+  body{margin:0;overflow:hidden;font-family:system-ui,-apple-system,Arial,sans-serif;background:#7ec850;touch-action:none;-webkit-user-select:none;user-select:none;}
+  /* Force full-screen canvas even if embedded */
+  #screen{position:fixed;inset:0;display:block;width:100vw;height:100vh;touch-action:none;background:#7ec850;z-index:1;}
+  #hud{position:fixed;top:10px;left:10px;background:var(--ui);padding:10px 12px;border-radius:12px;box-shadow:0 10px 22px var(--shadow);z-index:20;display:none;font-size:13px;line-height:1.25;max-width:min(92vw,820px);}
+  #toast{position:fixed;top:78px;left:50%;transform:translateX(-50%);background:#fff6a6;border:1px solid rgba(0,0,0,.12);border-radius:12px;padding:10px 12px;box-shadow:0 10px 22px rgba(0,0,0,.18);z-index:30;display:none;max-width:min(90vw,680px);}
+  #menuBtn{position:fixed;top:10px;right:10px;width:44px;height:44px;border-radius:50%;border:none;background:var(--green);color:#fff;font-weight:950;font-size:20px;box-shadow:0 10px 22px var(--shadow);z-index:25;display:none;}
+  #menuPanel{position:fixed;top:62px;right:10px;background:var(--ui);padding:10px;border-radius:14px;box-shadow:0 14px 28px rgba(0,0,0,.22);z-index:26;display:none;width:min(90vw,380px);}
+  #menuPanel .row{display:flex;gap:8px;flex-wrap:wrap;}
+  #menuPanel button{border:none;border-radius:10px;background:var(--green);color:#fff;padding:10px 10px;font-weight:950;flex:1 1 170px;}
+  #menuPanel .secondary{background:var(--dark);}
+  #menuPanel .muted{color:#444;font-size:12px;margin-top:8px;line-height:1.25;}
+  #analog{position:fixed;left:16px;bottom:16px;width:130px;height:130px;border-radius:50%;background:rgba(0,0,0,.18);z-index:25;display:none;touch-action:none;}
+  #knob{position:absolute;left:40px;top:40px;width:50px;height:50px;border-radius:50%;background:rgba(0,0,0,.42);pointer-events:none;}
+  #actionBtn{position:fixed;right:16px;bottom:22px;width:200px;height:54px;border:none;border-radius:16px;background:var(--dark);color:#fff;font-weight:950;font-size:16px;box-shadow:0 12px 26px rgba(0,0,0,.25);z-index:25;display:none;}
+  #clipboard{position:fixed;top:108px;right:10px;background:rgba(255,255,255,.92);padding:10px;border-radius:14px;box-shadow:0 14px 28px rgba(0,0,0,.20);z-index:19;display:none;width:min(86vw,360px);}
+  #clipboard h4{margin:0 0 6px;font-size:14px;}
+  #clipboard .small{font-size:12px;color:#333;line-height:1.25;}
+  #minimapWrap{position:fixed;bottom:92px;right:10px;background:rgba(255,255,255,.92);border-radius:14px;box-shadow:0 14px 28px rgba(0,0,0,.20);z-index:19;display:none;padding:8px;}
+  #minimap{width:140px;height:140px;display:block;border-radius:10px;background:#7ec850}
+
+  #startScreen{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:linear-gradient(#7ec850,#a0d995);z-index:40;}
+  #startCard{width:min(92vw,560px);background:rgba(255,255,255,.92);border-radius:18px;box-shadow:0 18px 50px rgba(0,0,0,.25);padding:18px 16px;text-align:center;}
+  #title{font-size:34px;font-weight:950;margin:6px 0 2px;}
+  #subtitle{margin:0 0 14px;color:#1c3a1c;font-weight:850;line-height:1.2;}
+  #startCard button{width:100%;border:none;border-radius:14px;padding:14px;font-weight:950;font-size:16px;margin:8px 0;background:var(--green);color:#fff;}
+  #startCard .secondary{background:var(--dark);}
+  #startCard .small{margin-top:10px;font-size:12px;color:#444;line-height:1.25;}
+
+  #night{position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:60;background:rgba(0,0,0,.35);}
+  #nightCard{width:min(92vw,640px);background:rgba(255,255,255,.95);border-radius:18px;box-shadow:0 18px 50px rgba(0,0,0,.25);padding:16px;}
+  #nightCard h2{margin:0 0 8px;font-size:22px;}
+  #nightGrid{display:grid;grid-template-columns:1fr;gap:10px;}
+  .nbox{background:rgba(0,0,0,.05);border-radius:14px;padding:10px;}
+  .nsmall{font-size:12px;color:#333;line-height:1.25;margin-top:6px;}
+  #nightCard button{width:100%;border:none;border-radius:14px;padding:14px;font-weight:950;font-size:16px;margin-top:10px;background:var(--green);color:#fff;}
+  #nightCard .muted{font-size:12px;color:#444;margin-top:8px;line-height:1.25;}
+
+  #custModal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:65;background:rgba(0,0,0,.35);}
+  #custCard{width:min(92vw,640px);background:rgba(255,255,255,.96);border-radius:18px;box-shadow:0 18px 50px rgba(0,0,0,.25);padding:14px;}
+  #custCard h2{margin:0 0 10px;font-size:20px;}
+  #custList{max-height:min(60vh,520px);overflow:auto;padding-right:4px;}
+  .custRow{display:flex;align-items:center;justify-content:space-between;gap:10px;background:rgba(0,0,0,.05);border-radius:14px;padding:10px;margin:8px 0;}
+  .custRow .left{display:flex;flex-direction:column;gap:2px;}
+  .custRow .name{font-weight:950;}
+  .pill{display:inline-block;padding:4px 8px;border-radius:999px;font-weight:950;font-size:12px;color:#111;background:#eaeaea}
+  .pill.good{background:rgba(40,200,80,.40)}
+  .pill.warn{background:rgba(240,210,60,.50)}
+  .pill.bad{background:rgba(220,70,70,.45)}
+  #custCard button{width:100%;border:none;border-radius:14px;padding:12px;font-weight:950;font-size:16px;margin-top:10px;background:var(--dark);color:#fff;}
+
+  /* error overlay */
+  #err{position:fixed;inset:0;background:rgba(0,0,0,.72);color:#fff;display:none;z-index:999;align-items:center;justify-content:center;padding:16px;}
+  #errCard{width:min(92vw,760px);background:rgba(20,20,20,.95);border-radius:18px;box-shadow:0 18px 50px rgba(0,0,0,.45);padding:16px;}
+  #errCard h2{margin:0 0 8px;font-size:18px;}
+  #errCard pre{white-space:pre-wrap;word-break:break-word;background:rgba(0,0,0,.35);padding:10px;border-radius:12px;max-height:50vh;overflow:auto;}
+  #errCard button{width:100%;border:none;border-radius:14px;padding:12px;font-weight:950;font-size:16px;margin-top:10px;background:var(--green);color:#fff;}
+    /* ===== Startup Progress Bar ===== */
+  #startupProgressWrap{
+    position:fixed;
+    left:0;
+    bottom:0;
+    width:100%;
+    height:8px;
+    background:rgba(0,0,0,.25);
+    z-index:100;
+  }
+
+  #startupProgressBar{
+    width:0%;
+    height:100%;
+    background:#1b5e20;
+    transition:width .1s linear;
+  }
+
+</style>
+</head>
+<body>
+
+<div id="err"><div id="errCard">
+  <h2>Game error (this is fixable)</h2>
+  <div style="font-size:12px;opacity:.9;margin-bottom:8px">Send me the text below if it appears.</div>
+  <pre id="errText"></pre>
+  <button id="errReload">Reload</button>
+</div></div>
+
+<div id="startScreen">
+  <div id="startCard">
+    <img id="startupIcon" src="icon-192.png" style="
+      width:96px;
+      height:96px;
+      border-radius:22px;
+      box-shadow:0 6px 18px rgba(0,0,0,.25);
+      margin-bottom:8px;
+    ">
+    <div id="title">🦫 Gopher Trapper</div>
+    <div id="subtitle">Trap Gophers To Control The Population</div>
+    <button id="btnNew">Start New Game</button>
+    <button class="secondary" id="btnContinue">Continue</button>
+    <div class="small">v14.0 — Simplified UI & NPC flow</div>
+  </div>
+
+  <!-- Startup progress bar -->
+  <div id="startupProgressWrap">
+    <div id="startupProgressBar"></div>
+  </div>
+</div>
+
+
+<div id="night"><div id="nightCard">
+  <h2>🌙 Night Summary</h2>
+  <div id="nightGrid"></div>
+  <button id="btnMorning">Start Morning</button>
+  <div class="muted">Tip: Menu → Customers shows satisfaction + owed holes.</div>
+</div></div>
+
+<div id="custModal"><div id="custCard">
+  <h2>📒 Customers</h2>
+  <div id="custList"></div>
+  <button id="custClose">Close</button>
+</div></div>
+
+<canvas id="screen"></canvas>
+
+<div id="hud">
+  💰 <b>$<span id="money">0</span></b> &nbsp;|&nbsp;
+  🦫 <b><span id="gophers">0</span></b> &nbsp;|&nbsp;
+  🪤 Traps <b><span id="traps">2</span></b> &nbsp;|&nbsp;
+ <span>🪤 Unchecked <b id="unchecked">0</b></span>
+  Customers <b><span id="cust">1</span></b> &nbsp;|&nbsp;
+  Day <b><span id="day">1</span></b> &nbsp;|&nbsp;
+  Time <b><span id="time">5:00</span></b> &nbsp;|&nbsp;
+  Weather <b><span id="wx">Clear</span></b>
+</div>
+
+<div id="toast"></div>
+<button id="menuBtn" aria-label="Menu">☰</button>
+<div id="menuPanel">
+  <div class="row">
+    <button id="buyTrap">Buy Trap ($5)</button>
+    <button id="buySilverTrap" class="secondary">Buy Silver Trap ($30)</button>
+    <button id="buyGoldTrap" class="secondary">Buy Gold Trap ($60)</button>
+    <button id="buyPlatinumTrap" class="secondary">Buy Platinum Trap ($100)</button>
+    <button id="buyBike" class="secondary">Buy Bike ($100)</button>
+    <button id="toggleBike" class="secondary" style="display:none">Bike: OFF</button>
+</div>
+  <div class="row">
+    <button id="btnCustomers" class="secondary">Customers</button>
+    <button id="toggleChecklist" class="secondary">Checklist</button>
+  </div>
+  <div class="row">
+    <button id="enableExtras" class="secondary">Enable Extras</button>
+    <button id="toggleMini" class="secondary">Minimap</button>
+  </div>
+  <div class="row">
+    <button id="togglePixel" class="secondary">Pixel Mode: ON</button>
+  </div>
+  <div class="row">
+    <button id="sleep" class="secondary">Sleep (End Day)</button>
+  </div>
+  <div class="muted" id="prices"></div>
+</div>
+
+<div id="clipboard">
+  <h4>📋 Today</h4>
+  <div class="small" id="jobs"></div>
+</div>
+
+<div id="minimapWrap"><canvas id="minimap" width="140" height="140"></canvas></div>
+<div id="analog"><div id="knob"></div></div>
+<button id="actionBtn">Action</button>
+
+<script>
+// Startup Debug HUD (shows JS errors on iPhone Safari)
+(function(){
+  try{
+    var hud=document.createElement('div');
+    hud.id='errHUD';
+    hud.style.cssText='position:fixed;left:8px;right:8px;bottom:8px;z-index:999999;background:rgba(0,0,0,.75);color:#fff;font:12px/1.3 -apple-system,system-ui,Arial;padding:8px;border-radius:10px;display:none;white-space:pre-wrap;';
+    document.addEventListener('DOMContentLoaded',function(){ document.body.appendChild(hud); });
+    function show(msg){ try{ hud.style.display='block'; hud.textContent=msg; }catch(e){} }
+    window.addEventListener('error', function(e){ show('JS error: '+(e && e.message ? e.message : e)); });
+    window.addEventListener('unhandledrejection', function(e){ show('Promise error: '+(e && e.reason ? e.reason : e)); });
+    window.__errHUD=show;
+  }catch(e){}
+})();
+
+(() => {
+  const errOverlay=document.getElementById('err');
+  const errText=document.getElementById('errText');
+  document.getElementById('errReload').onclick=()=>location.reload();
+
+  function showError(e){
+    errText.textContent = (e && (e.stack || e.message)) ? (e.stack || e.message) : String(e);
+    errOverlay.style.display='flex';
+  }
+  window.addEventListener('error', (ev)=>showError(ev.error||ev.message), {passive:true});
+  window.addEventListener('unhandledrejection', (ev)=>showError(ev.reason||ev), {passive:true});
+
+  try {
+    // --- core (same as v13.1 but with hardened resize) ---
+    const screen = document.getElementById('screen');
+    const sctx = screen.getContext('2d');
+    const off = document.createElement('canvas');
+    const ctx = off.getContext('2d');
+    const mini = document.getElementById('minimap').getContext('2d');
+
+    let pixelMode = true;
+    let logicalW = 480, logicalH = 800;
+
+    function fitLogical(){
+      const vw=window.innerWidth, vh=window.innerHeight;
+      const target=480/800, aspect=vw/vh;
+      if(aspect>target){ logicalH=800; logicalW=Math.round(logicalH*aspect); }
+      else { logicalW=480; logicalH=Math.round(logicalW/aspect); }
+      off.width=logicalW; off.height=logicalH;
+      ctx.imageSmoothingEnabled=false;
+    }
+    function resize(){
+      const vw=Math.max(1, window.innerWidth);
+      const vh=Math.max(1, window.innerHeight);
+      const dpr=Math.max(1, Math.min(3, window.devicePixelRatio||1));
+      screen.width=Math.floor(vw*dpr);
+      screen.height=Math.floor(vh*dpr);
+      screen.style.width=vw+'px';
+      screen.style.height=vh+'px';
+      sctx.setTransform(dpr,0,0,dpr,0,0);
+      sctx.imageSmoothingEnabled=!pixelMode;
+      fitLogical();
+    }
+    window.addEventListener('resize', resize, {passive:true});
+    window.addEventListener('orientationchange', ()=>setTimeout(resize, 50), {passive:true});
+    if(window.visualViewport){
+      window.visualViewport.addEventListener('resize', ()=>setTimeout(resize, 0), {passive:true});
+    }
+
+    const hud=document.getElementById('hud');
+    const toast=document.getElementById('toast');
+    const menuBtn=document.getElementById('menuBtn');
+    const menuPanel=document.getElementById('menuPanel');
+    const pricesEl=document.getElementById('prices');
+    const clipboard=document.getElementById('clipboard');
+    const jobsEl=document.getElementById('jobs');
+    const minimapWrap=document.getElementById('minimapWrap');
+
+    const startScreen=document.getElementById('startScreen');
+    const btnNew=document.getElementById('btnNew');
+    const btnContinue=document.getElementById('btnContinue');
+    function lockStartButtons(lock){
+  const btns = [btnNew, btnContinue];
+  btns.forEach(b=>{
+    if(!b) return;
+    b.disabled = lock;
+    b.style.opacity = lock ? '0.55' : '1';
+    b.style.pointerEvents = lock ? 'none' : 'auto';
+  });
+}
+
+const analog=document.getElementById('analog');
+    const knob=document.getElementById('knob');
+    const actionBtn=document.getElementById('actionBtn');
+
+    const night=document.getElementById('night');
+    const nightGrid=document.getElementById('nightGrid');
+    const btnMorning=document.getElementById('btnMorning');
+
+    const custModal=document.getElementById('custModal');
+    const custList=document.getElementById('custList');
+    const custClose=document.getElementById('custClose');
+
+    function showToast(msg){
+      toast.textContent=msg; toast.style.display='block';
+      clearTimeout(showToast._t); showToast._t=setTimeout(()=>toast.style.display='none',3000);
+    }
+    function formatClock(sec){
+      sec=Math.max(0,Math.floor(sec));
+      const m=Math.floor(sec/60), s=sec%60;
+      return `${m}:${String(s).padStart(2,'0')}`;
+    }
+
+    function nightDimAlpha(){
+      // 0 at start of day, gradually increases to DAY_NIGHT_MAX_DIM near end
+      const left = (typeof save?.daySecondsLeft==='number') ? save.daySecondsLeft : DAY_LENGTH_SEC;
+      const t = 1 - (left / DAY_LENGTH_SEC);
+      const start = DAY_NIGHT_START_FRAC;
+      const u = clamp((t - start) / (1 - start), 0, 1);
+      // ease-in for smoother transition
+      const eased = u*u*(3 - 2*u);
+      return eased * DAY_NIGHT_MAX_DIM;
+    }
+    function clamp(v,a,b){ return Math.max(a,Math.min(b,v)); }
+    function dist(ax,ay,bx,by){ return Math.hypot(ax-bx, ay-by); }
+    function rand01(){ return Math.random(); }
+
+    function countUncheckedTraps(){
+  if(!Array.isArray(save.holes)) return 0;
+
+  let n = 0;
+  for(const h of save.holes){
+    if(h.trap && h.trap.state === 'ready'){
+      n++;
+    }
+  }
+  return n;
+}
+
+
+
+
+    const WORLD_W=4200, WORLD_H=2700;
+    const SAVE_KEY='gopherHustleSave_v132_pages_cb_20251222_210500';
+
+    const BASE_SUCCESS=0.70;
+    const PAY_PER_SUCCESS=10;
+    const TRAP_PRICE=5;
+
+    // Trap tiers
+    const SILVER_TRAP_PRICE=30;
+    const GOLD_TRAP_PRICE=60;
+    
+
+    const PLATINUM_TRAP_PRICE=100;const SILVER_SUCCESS=0.80;
+    const GOLD_SUCCESS=0.90;
+
+    
+    const PLATINUM_SUCCESS=1.00;// Bike
+    const BIKE_PRICE=100;
+    const BIKE_SPEED_MUL=2.0;
+
+    
+
+    // Day -> night dimming
+    const DAY_LENGTH_SEC=300;
+    const DAY_NIGHT_MAX_DIM=0.55; // 0..1 darkness at end of day
+    const DAY_NIGHT_START_FRAC=0.05; // start dimming after 5% of day passes
+const FLYERS_PACK_PRICE=5; // 10 flyers
+    const FLYER_DELIVERY_COST=1;
+    const LEAD_CHANCE=0.35;
+    const RIVAL_HOLD_DAYS=3;
+    const RIVAL_CUSTOMER_LOCK_DAYS=4;
+    // Rival tuning
+    const RIVAL_GAIN_CHANCE=0.28;      // per night chance rival gains a new customer
+    const RIVAL_MIN_CUSTOMERS=3;         // rival tries to maintain at least this many customers      // per night chance rival gains a new customer
+    const RIVAL_LOSE_CHANCE=0.12;      // per rival customer per night chance to lose that customer
+    const RIVAL_STEAL_LEAD_CHANCE=0.22; // per night chance rival converts one of your leads
+    const RIVAL_TROUBLE_CHANCE=0.18;   // per night chance rival steals money (if you have >1 customer)
+
+
+    const SAT_START=100;
+    const SAT_HOLE_PENALTY=20;
+    const SAT_WARN_AT=45;
+
+    // Trap durability
+    const TRAP_MAX_USES=10;
+    const TRAP_FIX_COST=5; // per broken trap
+    const SUCCESS_SAT_BONUS=12; // extra satisfaction for a caught gopher on a customer's lot
+
+    const WX={
+      clear:{label:"Clear", holesMul:1.0, successMul:1.0, rain:0},
+      rain:{label:"Rain", holesMul:0.65, successMul:0.82, rain:1},
+      windy:{label:"Windy", holesMul:0.85, successMul:0.95, rain:0},
+    };
+
+    function defaultSave(){
+      return {
+        money:0,gophers:0,totalMissed:0,trapsInv:2,silverTraps:0,goldTraps:0, platinumTraps:0,flyers:0,
+        hasBike:false,bikeOn:false,
+        contracts:{home:true},
+        customers:{home:{sat:SAT_START, locked:true}},
+        leads:{}, flyersDropped:{}, rivalHold:{}, rivalSat:{}, rivalLockUntil:{}, rival:{money:0,trapsInv:2,silverTraps:0,goldTraps:0,platinumTraps:0,hasBike:false,bikeOn:false,ownedProps:{},lastPropBuyDay:-999},
+        day:1,daySecondsLeft:DAY_LENGTH_SEC,weather:'clear',
+        player:{x:360,y:530,animT:0,frame:0},
+        holes:[], trapAnims:[],
+        // Trap durability tracking (per-trap uses)
+        trapDur:{basic:[0,0], silver:[], gold:[], platinum:[]},
+        brokenTraps:{basic:0, silver:0, gold:0, platinum:0},
+        introLock: 1.2,
+        gatesOpen:{home:true},
+        npcMood:{},
+        goAwayDay:{}
+      };
+    }
+    function migrateSave(s){
+      if(!s) return defaultSave();
+      s.contracts=s.contracts||{home:true};
+      s.contracts.home=true;
+      s.customers=s.customers||{};
+      if(!s.customers.home) s.customers.home={sat:SAT_START,locked:true};
+      s.leads=s.leads||{};
+      s.flyersDropped=s.flyersDropped||{};
+      s.rivalHold=s.rivalHold||{};
+      s.gatesOpen=s.gatesOpen||{};
+      s.gatesOpen.home=true;
+      if(!s.npcMood) s.npcMood={};
+      if(!s.goAwayDay) s.goAwayDay={};
+      if(!s.rivalSat) s.rivalSat={};
+      if(!s.rivalLockUntil) s.rivalLockUntil={};
+      if(!s.rival) s.rival={money:0,trapsInv:2,silverTraps:0,goldTraps:0,platinumTraps:0,hasBike:false,bikeOn:false};
+      if(typeof s.rival.money!=='number') s.rival.money=0;
+      if(typeof s.rival.trapsInv!=='number') s.rival.trapsInv=2;
+      if(typeof s.rival.silverTraps!=='number') s.rival.silverTraps=0;
+      if(typeof s.rival.goldTraps!=='number') s.rival.goldTraps=0;
+      if(typeof s.rival.platinumTraps!=='number') s.rival.platinumTraps=0;
+      if(typeof s.rival.hasBike!=='boolean') s.rival.hasBike=false;
+      if(typeof s.rival.bikeOn!=='boolean') s.rival.bikeOn=false;
+      if(!s.rival.ownedProps) s.rival.ownedProps={};
+      if(typeof s.rival.lastPropBuyDay!=='number') s.rival.lastPropBuyDay=-999;
+      if(typeof s.flyers!=='number') s.flyers=0;
+      if(typeof s.trapsInv!=='number') s.trapsInv=2;
+      if(typeof s.silverTraps!=='number') s.silverTraps=0;
+      if(typeof s.goldTraps!=='number') s.goldTraps=0;
+      if(typeof s.platinumTraps!=='number') s.platinumTraps=0;
+
+      // Trap durability migration
+      if(!s.trapDur) s.trapDur={basic:[], silver:[], gold:[], platinum:[]};
+      if(!s.trapDur.basic) s.trapDur.basic=[];
+      if(!s.trapDur.silver) s.trapDur.silver=[];
+      if(!s.trapDur.gold) s.trapDur.gold=[];
+      if(!s.trapDur.platinum) s.trapDur.platinum=[];
+      // Ensure durability pools have at least one entry per trap in inventory
+      while(s.trapDur.basic.length < (s.trapsInv||0)) s.trapDur.basic.push(0);
+      while(s.trapDur.silver.length < (s.silverTraps||0)) s.trapDur.silver.push(0);
+      while(s.trapDur.gold.length < (s.goldTraps||0)) s.trapDur.gold.push(0);
+      while(s.trapDur.platinum.length < (s.platinumTraps||0)) s.trapDur.platinum.push(0);
+
+      if(!s.brokenTraps) s.brokenTraps={basic:0, silver:0, gold:0, platinum:0};
+      if(typeof s.brokenTraps.basic!=='number') s.brokenTraps.basic=0;
+      if(typeof s.brokenTraps.silver!=='number') s.brokenTraps.silver=0;
+      if(typeof s.brokenTraps.gold!=='number') s.brokenTraps.gold=0;
+      if(typeof s.brokenTraps.platinum!=='number') s.brokenTraps.platinum=0;
+      if(typeof s.hasBike!=='boolean') s.hasBike=false;
+      if(typeof s.bikeOn!=='boolean') s.bikeOn=false;
+      if(typeof s.daySecondsLeft!=='number') s.daySecondsLeft=300;
+      if(!s.weather) s.weather='clear';
+      s.holes=s.holes||[];
+      s.trapAnims=s.trapAnims||[];
+      if(typeof s.totalMissed!=='number') s.totalMissed=0;
+      if(typeof s.introLock!=='number') s.introLock=1.0;
+      return s;
+    }
+    function persist(){ try{ localStorage.setItem(SAVE_KEY, JSON.stringify(save)); }catch(e){} }
+    function loadSave(){ try{ const raw=localStorage.getItem(SAVE_KEY); if(!raw) return null; return JSON.parse(raw); }catch(e){ return null; } }
+
+    let save=migrateSave(loadSave());
+    let running=false;
+    let paused=false;
+    
+    let playerFrownUntil=0; // performance.now() timestamp
+    let playerGrinUntil=0; // brief success grin
+    // 1s heart-eyes pop for NPCs when you trap on their property
+    let npcHeartUntil = {}; // { [lotId]: timestampMs }
+function setPaused(p){
+      paused=!!p;
+      if(paused){
+        dir={x:0,y:0}; resetStick();
+        analog.style.display='none';
+      } else {
+        analog.style.display='block';
+      }
+    }
+
+    // town data
+    const lots=[], obstacles=[], mailboxes=[], roads=[], trees=[];
+
+    function addRoadRect(x,y,w,h){ roads.push({kind:'rect', x,y,w,h}); }
+    function addRoadCircle(cx,cy,r){ roads.push({kind:'circle', cx,cy,r}); }
+    function addTree(x,y){ trees.push({x,y,r:18}); }
+
+    function addLot(id,name,yard,building,door,mailbox,kind='house', fence=true){
+      let driveway = null;
+      if(door){
+        const h = (yard.y+yard.h) - door.y;
+        if(Number.isFinite(h) && h>12) driveway = { x: door.x-14, y: door.y, w:28, h };
+      }
+      const sidewalkFront = { x: yard.x, y: yard.y+yard.h-18, w: yard.w, h:18 };
+      const openW=120;
+      const gateCenter = { x: yard.x + yard.w/2, y: yard.y + yard.h };
+      lots.push({id,name,yard,building,door,mailbox,kind,fence,driveway,sidewalkFront, gateCenter, openW});
+      if(building && building.w>0) obstacles.push({x:building.x,y:building.y,w:building.w,h:building.h,type:building.type,label:building.label||name});
+      if(mailbox) mailboxes.push({lotId:id,x:mailbox.x,y:mailbox.y});
+    }
+
+    function addCuldesacNeighborhood(prefix, cx, cy){
+      addRoadRect(cx-80, cy-520, 160, 520);
+      addRoadCircle(cx, cy, 190);
+      const r=360;
+      for(let i=0;i<6;i++){
+        const ang = (i/6)*Math.PI*2 + Math.PI/6;
+        const hx = cx + Math.cos(ang)*r;
+        const hy = cy + Math.sin(ang)*r;
+        const yard = {x:hx-210, y:hy-170, w:420, h:300};
+        const building = {x:hx-120, y:hy-150, w:240, h:160, type:'house'};
+        const door = {x:hx, y:hy-6};
+        const mailbox = {x: hx + Math.cos(ang)*(-140), y: hy + Math.sin(ang)*(-140)};
+        addLot(`${prefix}${i+1}`, `Cul-de-sac Home ${i+1}`, yard, building, door, mailbox, 'house', false);
+      }
+    }
+
+    function buildTown(){
+      lots.length=0; obstacles.length=0; mailboxes.length=0; roads.length=0; trees.length=0;
+
+      addRoadRect(0,640,WORLD_W,190);
+      addRoadRect(0,1320,WORLD_W,190);
+      addRoadRect(660,0,190,WORLD_H);
+      addRoadRect(1340,0,190,WORLD_H);
+      addRoadRect(2920,0,210,WORLD_H);
+
+      addLot("home","Your House",
+        {x:240,y:260,w:480,h:340},
+        {x:350,y:290,w:260,h:175,type:"house",label:"HOME"},
+        {x:480,y:465},
+        {x:270,y:585},
+        "house", true
+      );
+      addLot("lot1","The Johnsons",{x:820,y:260,w:480,h:340},{x:930,y:290,w:260,h:175,type:"house"},{x:1060,y:465},{x:850,y:585},"house", true);
+      addLot("lot2","The Garcias",{x:1400,y:260,w:480,h:340},{x:1510,y:290,w:260,h:175,type:"house"},{x:1640,y:465},{x:1430,y:585},"house", true);
+    
+      addLot("lot3","The Lees",{x:240,y:880,w:480,h:340},{x:350,y:910,w:260,h:175,type:"house"},{x:480,y:1085},{x:270,y:1205},"house", true);
+      addLot("lot4","The Parkers",{x:820,y:880,w:480,h:340},{x:930,y:910,w:260,h:175,type:"house"},{x:1060,y:1085},{x:850,y:1205},"house", true);
+      
+addLot("lot5","The Browns",{x:1400,y:880,w:480,h:340},{x:1510,y:910,w:260,h:175,type:"house"},{x:1640,y:1085},{x:1430,y:1205},"house", true);
+
+      
+// === EXTENDED ROWS ALIGNED WITH EXISTING HOUSES (v17.3) ===
+
+// Row 1 extension
+addLot("lot6","The Millers",
+  {x:1980,y:260,w:480,h:340},
+  {x:2090,y:290,w:260,h:175,type:"house"},
+  {x:2220,y:465},
+  {x:2010,y:585},
+  "house", true
+);
+
+addLot("lot7","The Wilsons",
+  {x:2560,y:260,w:480,h:340},
+  {x:2670,y:290,w:260,h:175,type:"house"},
+  {x:2800,y:465},
+  {x:2590,y:585},
+  "house", true
+);
+
+addLot("lot8","The Andersons",
+  {x:3140,y:260,w:480,h:340},
+  {x:3250,y:290,w:260,h:175,type:"house"},
+  {x:3380,y:465},
+  {x:3170,y:585},
+  "house", true
+);
+
+// Row 2 extension
+addLot("lot9","The Thompsons",
+  {x:1980,y:880,w:480,h:340},
+  {x:2090,y:910,w:260,h:175,type:"house"},
+  {x:2220,y:1085},
+  {x:2010,y:1205},
+  "house", true
+);
+
+addLot("lot10","The Martins",
+  {x:2560,y:880,w:480,h:340},
+  {x:2670,y:910,w:260,h:175,type:"house"},
+  {x:2800,y:1085},
+  {x:2590,y:1205},
+  "house", true
+);
+
+addLot("lot11","The Walkers",
+  {x:3140,y:880,w:480,h:340},
+  {x:3250,y:910,w:260,h:175,type:"house"},
+  {x:3380,y:1085},
+  {x:3170,y:1205},
+  "house", true
+);
+addCuldesacNeighborhood("cs", 980, 2130);
+      addCuldesacNeighborhood("ce", 2600, 2130);
+
+      addLot("school","School",
+  {x:3620,y:70,w:860,h:550},
+  {x:3700,y:150,w:400,h:300,type:"school",label:"SCHOOL"},
+  {x:3900,y:450},
+  {x:3950,y:500},
+  "school",false
+);
+
+addLot("Church","Church",
+  {x:3620,y:650,w:860,h:550},
+  {x:3700,y:730,w:400,h:300,type:"church",label:"CHURCH"},
+  {x:3900,y:1020},
+  {x:3930,y:1070},
+  "church", false
+);
+
+addLot("Fire Station","Fire Station",
+  {x:3550,y:1230,w:860,h:460},
+  {x:3700,y:1300,w:400,h:300,type:"fire",label:"FIRE STATION"},
+  {x:3870,y:1600},
+  {x:3950,y:1650},
+  "fire", false
+);
+
+addLot("Grocery Store","Grocery Store",
+  {x:3550,y:1700,w:860,h:450},
+  {x:3700,y:1770,w:400,h:300,type:"store",label:"GROCERY STORE"},
+  {x:3870,y:2050},
+  {x:3950,y:2100},
+  "store", false
+);
+
+addLot("Diner","Diner",
+  {x:3550,y:2170,w:860,h:500},
+  {x:3700,y:2200,w:400,h:300,type:"store",label:"DINER"},
+  {x:3870,y:2500},
+  {x:3950,y:2550},
+  "diner", false
+);
+
+      addLot("park","Town Park",{x:1700,y:2100,w:980,h:520},{x:0,y:0,w:0,h:0,type:"none"},null,null,"park", false);
+
+      for(let i=0;i<90;i++){
+        const x=180+Math.random()*(WORLD_W-360);
+        const y=180+Math.random()*(WORLD_H-360);
+        let ok=true;
+        for(const o of obstacles){
+          if(x>=o.x-30 && x<=o.x+o.w+30 && y>=o.y-30 && y<=o.y+o.h+30){ ok=false; break; }
+        }
+        if(ok) addTree(x,y);
+      }
+    }
+    // --- NPCs (visual only) ---
+let npcs=[];
+function rebuildNPCs(){
+  npcs=[];
+  for(const l of lots){
+    if(!l || !l.door) continue;
+    // put NPC just outside yard near door for houses + civic buildings
+    const ox = (l.id==='home') ? -26 : 26;
+    npcs.push({lotId:l.id, x:l.door.x + ox, y:l.door.y + 28});
+  }
+}
+
+
+    buildTown();
+
+    
+    rebuildNPCs();
+// collisions: same as v13.1 (kept)
+    const FENCE_THICK=10;
+    function rectOverlap(ax,ay,aw,ah, bx,by,bw,bh){
+      return ax<bx+bw && ax+aw>bx && ay<by+bh && ay+ah>by;
+    }
+    function hasPermission(lotId){ return lotId==='home' || !!save.contracts?.[lotId]; }
+    function gateIsOpen(lotId){ return true; }
+    function setGateOpen(lotId, open){ /* gates removed */ }
+    function insideYard(l, x, y){
+      const r=l.yard;
+      return x>r.x+12 && x<r.x+r.w-12 && y>r.y+12 && y<r.y+r.h-12;
+    }
+    function fenceRectsFor(l){
+      const r=l.yard;
+      const openW=l.openW||120;
+      const gateX0 = r.x + (r.w-openW)/2;
+      const gateX1 = gateX0 + openW;
+      const back={x:r.x, y:r.y, w:r.w, h:FENCE_THICK};
+      const left={x:r.x, y:r.y, w:FENCE_THICK, h:r.h};
+      const right={x:r.x+r.w-FENCE_THICK, y:r.y, w:FENCE_THICK, h:r.h};
+      const frontL={x:r.x, y:r.y+r.h-FENCE_THICK, w:gateX0-r.x, h:FENCE_THICK};
+      const frontR={x:gateX1, y:r.y+r.h-FENCE_THICK, w:(r.x+r.w)-gateX1, h:FENCE_THICK};
+      const gate={x:gateX0, y:r.y+r.h-FENCE_THICK, w:openW, h:FENCE_THICK};
+      return {back,left,right,frontL,frontR,gate};
+    }
+    function collides(px,py){
+      const w=20,h=26;
+      const x=px-w/2, y=py-h/2;
+      for(const o of obstacles){ if(rectOverlap(x,y,w,h, o.x,o.y,o.w,o.h)) return true; }
+      for(const t of trees){ if(dist(px,py,t.x,t.y) < t.r*0.90) return true; }
+      for(const l of lots){
+        if(!l.fence) continue;
+        const fr=fenceRectsFor(l);
+        if(rectOverlap(x,y,w,h, fr.back.x,fr.back.y,fr.back.w,fr.back.h)) return true;
+        if(rectOverlap(x,y,w,h, fr.left.x,fr.left.y,fr.left.w,fr.left.h)) return true;
+        if(rectOverlap(x,y,w,h, fr.right.x,fr.right.y,fr.right.w,fr.right.h)) return true;
+        if(rectOverlap(x,y,w,h, fr.frontL.x,fr.frontL.y,fr.frontL.w,fr.frontL.h)) return true;
+        if(rectOverlap(x,y,w,h, fr.frontR.x,fr.frontR.y,fr.frontR.w,fr.frontR.h)) return true;
+        if(!gateIsOpen(l.id)){
+          if(rectOverlap(x,y,w,h, fr.gate.x,fr.gate.y,fr.gate.w,fr.gate.h)) return true;
+        }
+      }
+      return false;
+    }
+
+    function getCamera(){
+      const tx=save.player.x-logicalW/2;
+      const ty=save.player.y-logicalH/2;
+      return {x:clamp(tx,0,WORLD_W-logicalW), y:clamp(ty,0,WORLD_H-logicalH)};
+    }
+    function worldToScreen(wx,wy){ const cam=getCamera(); return {x:wx-cam.x, y:wy-cam.y}; }
+
+    // holes/traps
+
+    // Trap success FX
+    const trapFX = [];
+    function spawnTrapSuccessFX(x,y){
+      trapFX.push({x,y,t:0});
+      try{ if(navigator.vibrate) navigator.vibrate([40,30,40]); }catch(e){}
+    }
+
+    let holeIdCounter=1;
+    function pickWeather(){ const r=Math.random(); if(r<0.18) return 'rain'; if(r<0.35) return 'windy'; return 'clear'; }
+    function spawnHoleOnLot(lotId){
+      const lot=lots.find(l=>l.id===lotId); if(!lot) return null;
+      for(let t=0;t<90;t++){
+        const x=lot.yard.x+55+Math.random()*(lot.yard.w-110);
+        const y=lot.yard.y+55+Math.random()*(lot.yard.h-120);
+        let ok=true;
+        for(const o of obstacles){ if(x>=o.x-24 && x<=o.x+o.w+24 && y>=o.y-24 && y<=o.y+o.h+24){ ok=false; break; } }
+        if(!ok) continue;
+        return {id:`h${holeIdCounter++}`, x,y, lotId, trap:{state:'none', success:null, daySet:null}};
+      }
+      return null;
+    }
+    function overnightChance(type){
+      const wx=WX[save.weather]||WX.clear;
+      const t=type||'basic';
+      if(t==='platinum') return 1.0; // platinum always 100%
+      const base = (t==='gold') ? GOLD_SUCCESS : (t==='silver') ? SILVER_SUCCESS : BASE_SUCCESS;
+      return clamp(base*wx.successMul,0.1,0.95);
+    }
+    function startDaySpawn(isFirst=false){
+      save.holes=(save.holes||[]).filter(h=>h.trap && (h.trap.state==='set' || h.trap.state==='ready'));
+      save.weather=pickWeather();
+      const wx=WX[save.weather]||WX.clear;
+      for(const k of Object.keys(save.rivalHold||{})){
+        save.rivalHold[k]=Math.max(0, (save.rivalHold[k]||0)-1);
+        if(save.rivalHold[k]===0){
+          delete save.rivalHold[k];
+          if(save.rivalSat) delete save.rivalSat[k];
+        }
+      }
+      const customerIds=Object.keys(save.contracts||{});
+      for(const id of customerIds){
+        const base=(id==='home' && isFirst)?2:(Math.random()<0.55?1:2);
+        const scaled=Math.max(1, Math.round(base*wx.holesMul));
+        for(let i=0;i<scaled;i++){ const h=spawnHoleOnLot(id); if(h) save.holes.push(h); }
+      }
+    }
+    function resolveOvernightTraps(){
+      const chanceBasic=overnightChance('basic');
+      let successes=0, misses=0;
+      for(const h of save.holes){
+        if(h.trap?.state==='set' && h.trap.daySet===save.day){
+          const c = overnightChance(h.trap.type);
+          h.trap.success = Math.random()<c;
+          h.trap.state='ready';
+          if(h.trap.success) successes++; else misses++;
+        }
+      }
+      return {successes, misses, chance:chanceBasic};
+    }
+
+    function setTrap(idx){
+      const h=save.holes[idx]; if(!h) return;
+      if(h.trap?.state && h.trap.state!=='none'){ showToast("Trap already here."); return; }
+
+      function takeDur(type){
+        save.trapDur = save.trapDur || {basic:[], silver:[], gold:[], platinum:[]};
+        const arr = save.trapDur[type] || (save.trapDur[type]=[]);
+        return arr.length ? arr.pop() : 0;
+      }
+
+      // Choose best available trap (Platinum > Gold > Silver > Basic)
+      let type='basic';
+      if((save.platinumTraps||0)>0) type='platinum';
+      else if((save.goldTraps||0)>0) type='gold';
+      else if((save.silverTraps||0)>0) type='silver';
+
+      const hasInv = (type==='platinum') ? (save.platinumTraps>0) : (type==='gold') ? (save.goldTraps>0) : (type==='silver') ? (save.silverTraps>0) : (save.trapsInv>0);
+      if(!hasInv){ showToast("No traps in inventory."); return; }
+
+      if(!hasPermission(h.lotId) && h.lotId!=='park'){
+        save.money=Math.max(0, save.money-10);
+        showToast("🚫 No permission! Fine -$10.");
+        save.holes.splice(idx,1);
+        return;
+      }
+
+      if(type==='platinum') save.platinumTraps-=1;
+      else if(type==='gold') save.goldTraps-=1;
+      else if(type==='silver') save.silverTraps-=1;
+      else save.trapsInv-=1;
+
+      const uses = takeDur(type);
+      h.trap={state:'set', type, success:null, daySet:save.day, uses};
+      showToast(type==='platinum' ? "🪤 Platinum trap set. Check tomorrow!" :
+                type==='gold' ? "🪤 Gold trap set. Check tomorrow!" :
+                type==='silver' ? "🪤 Silver trap set. Check tomorrow!" :
+                "🪤 Trap set. Check tomorrow!");
+    }
+    function checkTrap(idx){
+      const h=save.holes[idx]; if(!h || !h.trap) return;
+      if(h.trap.state!=='ready'){ showToast("Not ready yet."); return; }
+
+      function totalBroken(){
+        const b=save.brokenTraps||{};
+        return (b.basic||0)+(b.silver||0)+(b.gold||0)+(b.platinum||0);
+      }
+      function promptFixBroken(){
+        const broken = totalBroken();
+        if(broken<=0) return;
+        const cost = broken * TRAP_FIX_COST;
+        const doFix = ()=>{
+          if(save.money < cost){ showToast(`Not enough money to fix traps. Need $${cost}.`); return; }
+          save.money -= cost;
+          save.trapDur = save.trapDur || {basic:[], silver:[], gold:[], platinum:[]};
+          const b=save.brokenTraps||{};
+          for(const t of ['basic','silver','gold','platinum']){
+            const n = b[t]||0;
+            for(let i=0;i<n;i++) save.trapDur[t].push(0);
+            b[t]=0;
+          }
+          save.brokenTraps=b;
+          showToast(`✅ Fixed ${broken} trap${broken===1?'':'s'} (-$${cost}).`);
+          persist();
+        };
+        try{
+          if(typeof showChoice==='function'){
+            showChoice('Traps broke!', `You have ${broken} broken trap${broken===1?'':'s'}.
+Fix them for $${TRAP_FIX_COST} each ($${cost} total)?`, `Fix ($${cost})`, 'Later', doFix);
+          } else {
+            if(confirm(`You have ${broken} broken trap${broken===1?'':'s'}. Fix for $${TRAP_FIX_COST} each ($${cost} total)?`)) doFix();
+          }
+        }catch(e){ try{ if(confirm(`Fix broken traps for $${cost}?`)) doFix(); }catch(_){ } }
+      }
+
+      // return inventory (unless the trap breaks)
+      const type=h.trap.type||'basic';
+      const prevUses = (typeof h.trap.uses==='number') ? h.trap.uses : 0;
+      const newUses = prevUses + 1;
+      const broke = (newUses >= TRAP_MAX_USES);
+      if(!broke){
+        save.trapDur = save.trapDur || {basic:[], silver:[], gold:[], platinum:[]};
+        const arr = save.trapDur[type] || (save.trapDur[type]=[]);
+        arr.push(newUses);
+        if(type==='platinum') save.platinumTraps=(save.platinumTraps||0)+1;
+        else if(type==='gold') save.goldTraps=(save.goldTraps||0)+1;
+        else if(type==='silver') save.silverTraps=(save.silverTraps||0)+1;
+        else save.trapsInv+=1;
+      } else {
+        save.brokenTraps = save.brokenTraps || {basic:0, silver:0, gold:0, platinum:0};
+        save.brokenTraps[type] = (save.brokenTraps[type]||0) + 1;
+      }
+
+      if(h.trap.success){ save.money+=PAY_PER_SUCCESS; save.gophers+=1; spawnTrapSuccessFX(h.x,h.y);
+        try{ playerGrinUntil = ((performance&&performance.now)?performance.now():Date.now()) + 1000; }catch(_e){}
+        // If this was on a customer's lot, pop 1s heart-eyes on that NPC too
+        try{
+          const now = ((performance&&performance.now)?performance.now():Date.now());
+          if(h.lotId && h.lotId!=='home' && save.contracts && save.contracts[h.lotId]){
+            npcHeartUntil[h.lotId] = now + 1000;
+            // Satisfaction boost for successful catches
+            ensureCustomer(h.lotId);
+            save.customers[h.lotId].sat = Math.min(100, (save.customers[h.lotId].sat||0) + SUCCESS_SAT_BONUS);
+          }
+        }catch(_e){}
+        showToast("✅ Success! +$10"); }
+      else { showToast("❌ Empty trap.");
+        try{ save.totalMissed = (save.totalMissed||0)+1; }catch(_e){}
+
+        try{ playerFrownUntil = ((performance&&performance.now)?performance.now():Date.now()) + 1000; }catch(_e){}
+        try{ if(navigator.vibrate) navigator.vibrate(80); }catch(_e){}
+        // EMPTY_TRAP_FROWN_PATCH
+      }
+      save.holes.splice(idx,1);
+
+      if(broke){
+        showToast("🪤 Trap broke! (Needs repair)");
+        promptFixBroken();
+      }
+    }
+
+    // satisfaction/leads/rival
+    function ensureCustomer(lotId){ save.customers=save.customers||{}; if(!save.customers[lotId]) save.customers[lotId]={sat:SAT_START, locked:false}; }
+    function lotName(lotId){
+      if(lotId==='home') return "Your Parents";
+      const lot=lots.find(l=>l.id===lotId);
+      return lot ? lot.name : lotId;
+    }
+
+    function npcMoodFor(lotId){
+      if(!save.npcMood) save.npcMood={};
+      if(!save.goAwayDay) save.goAwayDay={};
+      if(lotId==='home') return 'smile';
+      if(save.contracts && save.contracts[lotId]) return 'smile';
+      // If they told you "go away" today, show frown for the duration of the day
+      if(save.goAwayDay[lotId]===save.day) return 'frown';
+      return save.npcMood[lotId] || 'neutral';
+    }
+    function setNpcMood(lotId, mood){
+      if(!save.npcMood) save.npcMood={};
+      if(lotId && lotId!=='home') save.npcMood[lotId]=mood;
+    }
+
+    function endOfDayCustomerCheck(){
+      const summary={lost:[], warned:[]};
+      for(const id of Object.keys(save.contracts||{})){
+        ensureCustomer(id);
+        if(id==='home') continue;
+        const untrapped = (save.holes||[]).filter(h=>h.lotId===id && (!h.trap || h.trap.state==='none')).length;
+        if(untrapped>0) save.customers[id].sat=Math.max(0, save.customers[id].sat - untrapped*SAT_HOLE_PENALTY);
+        else save.customers[id].sat=Math.min(100, save.customers[id].sat + 6);
+        if(save.customers[id].sat<=0){
+          delete save.contracts[id]; delete save.leads[id];
+          setNpcMood(id,'frown');
+          save.rivalHold[id]=RIVAL_HOLD_DAYS;
+          if(!save.rivalLockUntil) save.rivalLockUntil={};
+          save.rivalLockUntil[id]=save.day + RIVAL_CUSTOMER_LOCK_DAYS;
+          summary.lost.push(lotName(id));
+        } else if(save.customers[id].sat<=SAT_WARN_AT){
+          summary.warned.push(`${lotName(id)} (${save.customers[id].sat}%)`);
+        }
+      }
+      save.contracts.home=true; ensureCustomer('home'); save.customers.home.locked=true;
+      return summary;
+    }
+    function resolveFlyersToLeads(){
+      const summary={turned:[]};
+      for(const lotId of Object.keys(save.flyersDropped||{})){
+        if(save.flyersDropped[lotId]===save.day) continue;
+        if(save.contracts[lotId] || save.rivalHold[lotId]){ delete save.flyersDropped[lotId]; continue; }
+        if(rand01() < LEAD_CHANCE){ save.leads[lotId]=true; summary.turned.push(lotName(lotId)); }
+        delete save.flyersDropped[lotId];
+      }
+      return summary;
+    }
+    
+function randomRivalEvent(){
+      let loss = 0;
+      let gained = [];
+      let lost = [];
+      let propsBought = [];
+
+      // Rival inactive until Day 7
+      if(save.day < 7){
+        return {happened:false, loss, gained, lost, props:propsBought};
+      }
+
+      // Day 7 market entry notice
+      if(save.day === 7 && !save.flags?.rivalEntered){
+        save.flags = save.flags || {};
+        save.flags.rivalEntered = true;
+        gained.push("Rival has entered the market");
+      }
+
+      const rivalCustCount = Object.keys(save.rivalHold||{}).filter(id=>save.rivalHold[id]).length;
+      const needsCustomers = rivalCustCount < RIVAL_MIN_CUSTOMERS;
+
+      // Rival earns money ONLY from successful traps (same rules as player)
+      let rivalSuccesses = 0;
+      // Rival cannot trap gophers unless they have customers
+      if(rivalCustCount > 0){
+        try{
+        const r = save.rival || {};
+        const traps = {
+          platinum: r.platinumTraps||0,
+          gold: r.goldTraps||0,
+          silver: r.silverTraps||0,
+          basic: r.trapsInv||0
+        };
+        const totalTraps = traps.platinum + traps.gold + traps.silver + traps.basic;
+        const maxChecks = Math.min(totalTraps, rivalCustCount*2);
+
+        function takeBest(){
+          if(traps.platinum>0){ traps.platinum--; return 'platinum'; }
+          if(traps.gold>0){ traps.gold--; return 'gold'; }
+          if(traps.silver>0){ traps.silver--; return 'silver'; }
+          if(traps.basic>0){ traps.basic--; return 'basic'; }
+          return null;
+        }
+
+        for(let i=0;i<maxChecks;i++){
+          const t = takeBest();
+          if(!t) break;
+          if(rand01() < overnightChance(t)) rivalSuccesses++;
+        }
+
+        if(rivalSuccesses>0){
+          save.rival.money = (save.rival.money||0) + rivalSuccesses*PAY_PER_SUCCESS;
+        }
+      }catch(e){}
+      }
+
+      // Normal rival gain/loss logic (existing chances)
+      try{
+        if(needsCustomers || rand01() < RIVAL_GAIN_CHANCE){
+          const candidates = lots
+            .filter(l => l.id!=='home' && !save.contracts[l.id] && !save.leads[l.id] && !save.rivalHold[l.id])
+            .map(l => l.id);
+          if(candidates.length){
+            const pick = candidates[Math.floor(rand01()*candidates.length)];
+            save.rivalHold[pick] = RIVAL_HOLD_DAYS;
+            save.rivalLockUntil = save.rivalLockUntil || {};
+            save.rivalLockUntil[pick] = save.day + RIVAL_CUSTOMER_LOCK_DAYS;
+            save.rivalSat = save.rivalSat || {};
+            save.rivalSat[pick] = clamp(65 + Math.floor(rand01()*36),0,100);
+            gained.push(lotName(pick));
+          }
+        }
+
+        if(rand01() < RIVAL_LOSE_CHANCE && rivalCustCount>0){
+          const ids = Object.keys(save.rivalHold||{}).filter(id=>save.rivalHold[id]);
+          const pick = ids[Math.floor(rand01()*ids.length)];
+          delete save.rivalHold[pick];
+          delete save.rivalSat?.[pick];
+          lost.push(lotName(pick));
+          loss++;
+        }
+      }catch(e){}
+
+      // HARD FLOOR: rival must end night with >= 3 customers
+      try{
+        let safety=0;
+        while(Object.keys(save.rivalHold||{}).filter(id=>save.rivalHold[id]).length < RIVAL_MIN_CUSTOMERS){
+          const candidates = lots
+            .filter(l => l.id!=='home' && !save.contracts[l.id] && !save.leads[l.id] && !save.rivalHold[l.id])
+            .map(l => l.id);
+          if(!candidates.length) break;
+          const pick = candidates[Math.floor(rand01()*candidates.length)];
+          save.rivalHold[pick] = RIVAL_HOLD_DAYS;
+          save.rivalLockUntil = save.rivalLockUntil || {};
+          save.rivalLockUntil[pick] = save.day + RIVAL_CUSTOMER_LOCK_DAYS;
+          save.rivalSat = save.rivalSat || {};
+          save.rivalSat[pick] = clamp(65 + Math.floor(rand01()*36),0,100);
+          gained.push(lotName(pick));
+          safety++; if(safety>20) break;
+        }
+      }catch(e){}
+
+      // Property buying: starts Day 15, full price, 5-day cooldown
+      try{
+        save.rival.ownedProps = save.rival.ownedProps || {};
+        save.rival.lastPropBuyDay = save.rival.lastPropBuyDay ?? -999;
+
+        if(save.day >= 15 && (save.day - save.rival.lastPropBuyDay) >= 5 && rand01() < 0.35){
+          const candidates = lots.filter(l=>l.id!=='home' && !save.rival.ownedProps[l.id]).map(l=>l.id);
+          if(candidates.length){
+            const pick = candidates[Math.floor(rand01()*candidates.length)];
+            const name = lotName(pick);
+            const baseCost = (/fire|station|department|store|church|school|diner/i.test(name)) ? 500 : 100;
+            if((save.rival.money||0) >= baseCost){
+              save.rival.money -= baseCost;
+              save.rival.ownedProps[pick] = true;
+              save.rival.lastPropBuyDay = save.day;
+              propsBought.push(name);
+            }
+          }
+        }
+      }catch(e){}
+
+      return {happened:(loss>0 || gained.length || lost.length || propsBought.length), loss, gained, lost, props:propsBought};
+    }
+
+
+    function spawnAtHomeDriveway(){
+      const home=lots.find(l=>l.id==='home');
+      if(home && home.driveway){
+        save.player.x = home.driveway.x + home.driveway.w/2;
+        save.player.y = home.yard.y + home.yard.h + 26;
+      } else { save.player.x=360; save.player.y=530; }
+      setGateOpen('home', true);
+    }
+
+    function openNightSummary(data){
+      nightGrid.innerHTML="";
+      const add=(t,html)=>{
+        const d=document.createElement('div');
+        d.className='nbox';
+        d.innerHTML=`<b>${t}</b><div class="nsmall">${html}</div>`;
+        nightGrid.appendChild(d);
+      };
+      add("🪤 Trap Results", `Success <b>${data.traps.successes}</b> • Miss <b>${data.traps.misses}</b><br/>Chance <b>${Math.round(data.traps.chance*100)}%</b>`);
+      // Lifetime stats
+      const caught = save.gophers||0;
+      const missed = save.totalMissed||0;
+      const total = caught + missed;
+      const pct = total>0 ? Math.round((caught/total)*100) : 0;
+      add("📊 Stats", `Caught <b>${caught}</b> • Missed <b>${missed}</b><br/>Catch rate <b>${pct}%</b>`);
+
+      add("📨 Flyers → Leads", data.leads.turned.length ? `New leads: <b>${data.leads.turned.length}</b><br/>${data.leads.turned.map(n=>`• ${n}`).join('<br/>')}` : "No new leads tonight.");
+      add("😊 Satisfaction", data.cust.lost.length ? `Lost: <b>${data.cust.lost.length}</b><br/>${data.cust.lost.map(n=>`• ${n}`).join('<br/>')}` : (data.cust.warned.length ? `Warnings:<br/>${data.cust.warned.map(n=>`• ${n}`).join('<br/>')}` : "Everyone is happy."));
+      add("🕴️ Rival", (data.rival && data.rival.happened) ? (()=>{const parts=[];
+        if(data.rival.gained && data.rival.gained.length) parts.push(`Gained: <b>${data.rival.gained.length}</b><br/>${data.rival.gained.map(n=>`• ${n}`).join("<br/>")}`);
+        if(data.rival.lost && data.rival.lost.length) parts.push(`Lost: <b>${data.rival.lost.length}</b><br/>${data.rival.lost.map(n=>`• ${n}`).join("<br/>")}`);
+        if(data.rival.props && data.rival.props.length) parts.push(`Bought properties: <b>${data.rival.props.length}</b><br/>${data.rival.props.map(n=>`• ${n}`).join("<br/>")}`);
+        if(data.rival.loss>0) parts.push(`Stole: <b>$${data.rival.loss}</b>`);
+        return parts.length?parts.join("<hr style=\"border:none;border-top:1px solid rgba(0,0,0,.12);margin:8px 0\">"):"No rival events tonight.";
+      })() : "No rival events tonight.");
+
+      add("🌤️ Tomorrow", `Weather: <b>${(WX[data.tomorrowWeather]||WX.clear).label}</b><br/>Expected success: <b>${Math.round(data.tomorrowChance*100)}%</b>`);
+      night.style.display='flex';
+      setPaused(true);
+    }
+    function closeNightSummary(){ night.style.display='none'; setPaused(false); }
+
+    function endDay(){
+      const tomorrowWeather = pickWeather();
+      const tomorrowChance = clamp(BASE_SUCCESS*(WX[tomorrowWeather]||WX.clear).successMul,0.1,0.95);
+      const custSummary=endOfDayCustomerCheck();
+      const trapSummary=resolveOvernightTraps();
+      const leadSummary=resolveFlyersToLeads();
+      const rivalSummary=randomRivalEvent();
+
+      save.day += 1;
+      save.daySecondsLeft = DAY_LENGTH_SEC;
+      save.introLock = 1.2;
+      save.weather = tomorrowWeather;
+
+      for(const k of Object.keys(save.rivalHold||{})){
+        save.rivalHold[k]=Math.max(0, (save.rivalHold[k]||0)-1);
+        if(save.rivalHold[k]===0){
+          delete save.rivalHold[k];
+          if(save.rivalSat) delete save.rivalSat[k];
+        }
+      }
+
+      const wx=WX[save.weather]||WX.clear;
+      save.holes=(save.holes||[]).filter(h=>h.trap && (h.trap.state==='set' || h.trap.state==='ready'));
+      for(const id of Object.keys(save.contracts||{})){
+        const base=(Math.random()<0.55?1:2);
+        const scaled=Math.max(1, Math.round(base*wx.holesMul));
+        for(let i=0;i<scaled;i++){ const h=spawnHoleOnLot(id); if(h) save.holes.push(h); }
+      }
+
+      spawnAtHomeDriveway();
+      persist();
+
+      openNightSummary({traps:trapSummary, leads:leadSummary, cust:custSummary, rival:rivalSummary, tomorrowWeather, tomorrowChance});
+    }
+
+    // joystick
+    let stickActive=false, stickId=null;
+    let dir={x:0,y:0};
+    function setKnob(dx,dy){ knob.style.left=(40+dx)+'px'; knob.style.top=(40+dy)+'px'; }
+    function resetStick(){ dir={x:0,y:0}; setKnob(0,0); stickActive=false; stickId=null; }
+    function handleStickMove(clientX,clientY){
+      const rect=analog.getBoundingClientRect();
+      let dx=clientX-rect.left-rect.width/2;
+      let dy=clientY-rect.top-rect.height/2;
+      const d=Math.hypot(dx,dy), max=42;
+      if(d>max){ dx=dx/d*max; dy=dy/d*max; }
+      setKnob(dx,dy);
+      dir={x:dx/max, y:dy/max};
+    }
+    analog.addEventListener('pointerdown',(e)=>{ e.preventDefault(); stickActive=true; stickId=e.pointerId; analog.setPointerCapture?.(e.pointerId); handleStickMove(e.clientX,e.clientY); },{passive:false});
+    analog.addEventListener('pointermove',(e)=>{ if(!stickActive) return; if(stickId!=null && e.pointerId!==stickId) return; e.preventDefault(); handleStickMove(e.clientX,e.clientY); },{passive:false});
+    analog.addEventListener('pointerup',(e)=>{ if(stickId==null || e.pointerId===stickId) resetStick(); },{passive:true});
+    analog.addEventListener('pointercancel',()=>resetStick(),{passive:true});
+    analog.addEventListener('touchstart',(e)=>{ e.preventDefault(); const t=e.changedTouches[0]; stickActive=true; stickId=t.identifier; handleStickMove(t.clientX,t.clientY); },{passive:false});
+    analog.addEventListener('touchmove',(e)=>{ if(!stickActive) return; const t=[...e.touches].find(x=>x.identifier===stickId) || e.touches[0]; if(!t) return; e.preventDefault(); handleStickMove(t.clientX,t.clientY); },{passive:false});
+    analog.addEventListener('touchend',(e)=>{ const ended=[...e.changedTouches].some(t=>t.identifier===stickId); if(ended) resetStick(); },{passive:true});
+    analog.addEventListener('touchcancel',()=>resetStick(),{passive:true});
+
+    function movePlayer(dt){
+      if(paused) return;
+      if(save.introLock && save.introLock>0) return;
+      const speed=270 * ((save.hasBike && save.bikeOn) ? BIKE_SPEED_MUL : 1);
+      const vx=dir.x*speed, vy=dir.y*speed;
+      const p=save.player;
+      if(Math.abs(vx)+Math.abs(vy)>5){
+        p.animT+=dt;
+        if(p.animT>0.12){ p.animT=0; p.frame=(p.frame+1)%4; }
+      } else { p.frame=0; p.animT=0; }
+      let nx=clamp(p.x+vx*dt, 24, WORLD_W-24);
+      if(!collides(nx,p.y)) p.x=nx;
+      let ny=clamp(p.y+vy*dt, 24, WORLD_H-24);
+      if(!collides(p.x,ny)) p.y=ny;
+    }
+
+    // interactions
+    function yardHasAnyHole(lotId){ return (save.holes||[]).some(h=>h.lotId===lotId); }
+    function nearestGate(){ return null; }
+
+    function nearestDoor(){
+      let best=null, bestD=1e9;
+      for(const l of lots){
+        if(!l.door) continue;
+        const d=dist(save.player.x,save.player.y,l.door.x,l.door.y);
+        if(d<bestD){ bestD=d; best={lot:l, d}; }
+      }
+      return best;
+    }
+    function nearestMailbox(){
+      let best=null, bestD=1e9;
+      for(const m of mailboxes){
+        const d=dist(save.player.x,save.player.y,m.x,m.y);
+        if(d<bestD){ bestD=d; best={m, d}; }
+      }
+      return best;
+    }
+    function nearestHole(){
+      let best=-1, bestD=1e9;
+      for(let i=0;i<save.holes.length;i++){
+        const h=save.holes[i];
+        const d=dist(save.player.x,save.player.y,h.x,h.y);
+        if(d<bestD){ bestD=d; best=i; }
+      }
+      return {idx:best, d:bestD};
+    }
+
+    function ensureFlyersDropped(){ save.flyersDropped=save.flyersDropped||{}; }
+
+    function updateActionLabel(){
+      if(!running || paused){ actionBtn.textContent=""; actionBtn.dataset.mode="none"; return; }
+
+      const g=nearestGate();
+      if(g && g.d<95){
+        const open=gateIsOpen(g.lot.id);
+        actionBtn.textContent = open ? "Close Gate" : "Open Gate";
+        actionBtn.dataset.mode="gate";
+        actionBtn.dataset.lot=g.lot.id;
+        return;
+      }
+
+      const d=nearestDoor();
+      if(d && d.d<95){
+        const id=d.lot.id;
+        if(save.contracts[id]){
+          ensureCustomer(id);
+          actionBtn.textContent = (id==='home') ? "Say Hi" : `Talk (${save.customers[id].sat}%)`;
+          actionBtn.dataset.mode="doorInfo";
+          actionBtn.dataset.lot=id;
+          return;
+        }
+        if(save.rivalHold[id]){
+          actionBtn.textContent=`Rival (${save.rivalHold[id]}d)`;
+          actionBtn.dataset.mode="none";
+          return;
+        }
+        if(save.leads[id]){
+          actionBtn.textContent="Talk (Sign Contract)";
+          actionBtn.dataset.mode="sign";
+          actionBtn.dataset.lot=id;
+          return;
+        }
+        actionBtn.textContent="Knock (No Lead)";
+        actionBtn.dataset.mode="knock";
+        actionBtn.dataset.lot=id;
+        return;
+      }
+
+      const mb=nearestMailbox();
+      if(mb && mb.d<95){
+        const lotId=mb.m.lotId;
+        if(!save.contracts[lotId] && !save.leads[lotId] && !save.rivalHold[lotId] && save.flyers>0 && save.money>=FLYER_DELIVERY_COST){
+          actionBtn.textContent=`Drop Flyer (-$${FLYER_DELIVERY_COST})`;
+          actionBtn.dataset.mode="flyer";
+          actionBtn.dataset.lot=lotId;
+          return;
+        }
+      }
+
+      const {idx, d:hd}=nearestHole();
+      if(idx!==-1 && hd<85){
+        const h=save.holes[idx];
+        if(h.trap?.state==='ready') actionBtn.textContent="Check Trap";
+        else if(h.trap?.state==='set') actionBtn.textContent="Trap Set";
+        else actionBtn.textContent="Set Trap";
+        actionBtn.dataset.mode="hole";
+        actionBtn.dataset.idx=String(idx);
+        return;
+      }
+
+      actionBtn.textContent="Action";
+      actionBtn.dataset.mode="none";
+    }
+
+    actionBtn.addEventListener('click', ()=>{
+      if(!running || paused) return;
+      const mode=actionBtn.dataset.mode||"none";
+
+      if(mode==="gate"){
+        const lotId=actionBtn.dataset.lot;
+        const l=lots.find(x=>x.id===lotId);
+        if(!l) return;
+        const open=gateIsOpen(lotId);
+        if(open && insideYard(l, save.player.x, save.player.y)){
+          showToast("You're inside. Step out before closing.");
+          return;
+        }
+        setGateOpen(lotId, !open);
+        showToast(!open ? "🚪 Gate opened." : "🔒 Gate closed.");
+        return;
+      }
+
+      if(mode==="sign"){
+        const lotId=actionBtn.dataset.lot;
+        if(save.rivalHold[lotId]){ showToast("Rival still has them."); return; }
+        if(!save.leads[lotId]){ showToast("No lead yet."); return; }
+        save.contracts[lotId]=true;
+        ensureCustomer(lotId);
+        delete save.leads[lotId];
+        setNpcMood(lotId,'smile');
+        showToast(`✅ Contract signed with ${lotName(lotId)}!`);
+        return;
+      }
+
+      if(mode==="doorInfo"){
+        const lotId=actionBtn.dataset.lot;
+        ensureCustomer(lotId);
+        if(lotId==='home'){ showToast("Mom: 'Don’t forget to check your traps tomorrow!'"); return; }
+        showToast(`${lotName(lotId)} satisfaction: ${save.customers[lotId].sat}%`);
+        return;
+      }
+
+
+      if(mode==="hole"){
+        const idx=parseInt(actionBtn.dataset.idx||"-1",10);
+        if(!Number.isFinite(idx) || idx<0 || idx>=save.holes.length) return;
+        const h=save.holes[idx];
+        const d=dist(save.player.x,save.player.y,h.x,h.y);
+        if(d>85){ showToast("Get closer to a hole."); return; }
+        if(h.trap?.state==='ready') checkTrap(idx);
+        else if(h.trap?.state==='set') showToast("Trap set. Check tomorrow.");
+        else setTrap(idx);
+        return;
+      }
+
+      showToast("Walk close to a gate, door, mailbox, or hole.");
+    });
+
+    function satPill(sat){
+      if(sat>=70) return {cls:'good', text:`${sat}% Happy`};
+      if(sat>=40) return {cls:'warn', text:`${sat}% Worried`};
+      return {cls:'bad', text:`${sat}% Mad`};
+    }
+    function openCustomers(){
+      custList.innerHTML="";
+      const ids=Object.keys(save.contracts||{});
+      ids.sort((a,b)=> (a==='home'?-1:0) - (b==='home'?-1:0));
+      for(const id of ids){
+        ensureCustomer(id);
+        const sat=save.customers[id].sat;
+        const pill=satPill(sat);
+        const untrapped=(save.holes||[]).filter(h=>h.lotId===id && (!h.trap||h.trap.state==='none')).length;
+        const row=document.createElement('div');
+        row.className='custRow';
+        row.innerHTML = `
+          <div class="left">
+            <div class="name">${lotName(id)} ${id==='home' ? '🔒' : ''}</div>
+            <div class="nsmall">Untrapped holes today: <b>${untrapped}</b></div>
+          </div>
+          <div class="pill ${pill.cls}">${pill.text}</div>
+        `;
+        custList.appendChild(row);
+      }
+      custModal.style.display='flex';
+      setPaused(true);
+    }
+    function closeCustomers(){ custModal.style.display='none'; setPaused(false); }
+    document.getElementById('btnCustomers').addEventListener('click', openCustomers);
+    custClose.addEventListener('click', closeCustomers);
+    
+
+  
+
+ function updateHud(){
+  document.getElementById('money').textContent=Math.floor(save.money);
+  document.getElementById('gophers').textContent=save.gophers;
+  document.getElementById('traps').textContent=(save.trapsInv + (save.silverTraps||0) + (save.goldTraps||0) + (save.platinumTraps||0));
+  document.getElementById('unchecked').textContent=countUncheckedTraps(); 
+  document.getElementById('cust').textContent=Object.keys(save.contracts||{}).length;
+  document.getElementById('day').textContent=save.day;
+  document.getElementById('time').textContent=formatClock(save.daySecondsLeft);
+  document.getElementById('wx').textContent=(WX[save.weather]||WX.clear).label;
+}
+
+
+
+
+
+    function updatePrices(){
+      pricesEl.textContent=`Basic Trap $${TRAP_PRICE} • Silver Trap $${SILVER_TRAP_PRICE} • Gold Trap $${GOLD_TRAP_PRICE} • Platinum Trap $${PLATINUM_TRAP_PRICE} • Bike $${BIKE_PRICE} • Pay $${PAY_PER_SUCCESS}`;
+    }
+    function updateClipboard(){
+      const ids=Object.keys(save.contracts||{});
+      const remaining={}; ids.forEach(id=>remaining[id]=0);
+      for(const h of save.holes){
+        if(remaining[h.lotId]!=null && (!h.trap || h.trap.state==='none')) remaining[h.lotId]++;
+      }
+      const ready=save.holes.filter(h=>h.trap?.state==='ready').length;
+      const set=save.holes.filter(h=>h.trap?.state==='set').length;
+      const leads=Object.keys(save.leads||{}).length;
+
+      const lines=[];
+      lines.push(`Customers: <b>${ids.length}</b> • Leads: <b>${leads}</b>`);
+      lines.push(`Traps inv: <b>${save.trapsInv}</b> • Set: <b>${set}</b> • Ready: <b>${ready}</b>`);
+      lines.push(`<hr style="border:none;border-top:1px solid rgba(0,0,0,.12);margin:8px 0">`);
+      lines.push(`<b>Untrapped holes</b>:`);
+      for(const id of ids){ lines.push(`${remaining[id]||0} 🕳️ — ${lotName(id)}`); }
+
+
+      // Rival money + equipment
+      const r = (save.rival||{});
+      const rMoney = Math.floor((r.money||0));
+      const rBasic = (r.trapsInv||0);
+      const rSilver = (r.silverTraps||0);
+      const rGold = (r.goldTraps||0);
+      const rPlat = (r.platinumTraps||0);
+      const rTotal = rBasic + rSilver + rGold + rPlat;
+      const rBike = (r.hasBike ? ('YES' + (r.bikeOn?' (ON)':' (OFF)')) : 'NO');
+      lines.push(`<hr style="border:none;border-top:1px solid rgba(0,0,0,.12);margin:8px 0">`);
+      lines.push(`<b>Rival</b>: 💰 <b>$${rMoney}</b> • 🚲 Bike: <b>${rBike}</b>`);
+      lines.push(`🪤 Traps — Basic <b>${rBasic}</b>, Silver <b>${rSilver}</b>, Gold <b>${rGold}</b>, Platinum <b>${rPlat}</b> (Total <b>${rTotal}</b>)`);
+
+      // Rival properties owned
+      const rProps = (r.ownedProps||{});
+      const rPropIds = Object.keys(rProps).filter(k=>rProps[k]);
+      if(rPropIds.length){
+        lines.push(`🏠 Properties: <b>${rPropIds.length}</b> — ${rPropIds.map(id=>lotName(id)).join(', ')}`);
+      } else {
+        lines.push(`🏠 Properties: <b>0</b>`);
+      }
+
+      // Rival customers (rival-held houses)
+      const rivalIds=Object.keys(save.rivalHold||{}).filter(id=>save.rivalHold[id]);
+      if(rivalIds.length){
+        lines.push(`<hr style="border:none;border-top:1px solid rgba(0,0,0,.12);margin:8px 0">`);
+        lines.push(`<b>Rival customers</b>: <b>${rivalIds.length}</b>`);
+        for(const id of rivalIds){
+          const sat = (save.rivalSat && typeof save.rivalSat[id]==='number') ? save.rivalSat[id] : Math.round(((save.rivalHold[id]||1)/RIVAL_HOLD_DAYS)*100);
+          lines.push(`${clamp(Math.round(sat),0,100)}% — ${lotName(id)}`);
+        }
+      } else {
+        lines.push(`<hr style="border:none;border-top:1px solid rgba(0,0,0,.12);margin:8px 0">`);
+        lines.push(`<b>Rival customers</b>: <b>0</b>`);
+      }
+      jobsEl.innerHTML=lines.join('<br>');
+    }
+
+    function drawMinimap(){
+      const w=140,h=140;
+      mini.clearRect(0,0,w,h);
+      mini.fillStyle='#7ec850'; mini.fillRect(0,0,w,h);
+      for(const l of lots){
+        if(!save.contracts[l.id]) continue;
+        mini.fillStyle='rgba(40,200,80,.75)';
+        mini.fillRect(l.yard.x/WORLD_W*w, l.yard.y/WORLD_H*h, l.yard.w/WORLD_W*w, l.yard.h/WORLD_H*h);
+      }
+
+      // Property ownership outlines
+      try{
+        const you=save.ownedProps||{};
+        const rival=(save.rival && save.rival.ownedProps) ? save.rival.ownedProps : {};
+        for(const l of lots){
+          if(!l || l.id==='home') continue;
+          const x=l.yard.x/WORLD_W*w, y=l.yard.y/WORLD_H*h, ww=l.yard.w/WORLD_W*w, hh=l.yard.h/WORLD_H*h;
+          if(you[l.id]){
+            mini.strokeStyle='rgba(0,90,0,.95)';
+            mini.lineWidth=2;
+            mini.strokeRect(x+0.5, y+0.5, ww-1, hh-1);
+          }
+          if(rival[l.id]){
+            mini.strokeStyle='rgba(140,0,0,.95)';
+            mini.lineWidth=2;
+            mini.strokeRect(x+0.5, y+0.5, ww-1, hh-1);
+          }
+        }
+      }catch(e){}
+      // Rival-held houses (mini map)
+      if(save.rivalHold){
+        for(const id of Object.keys(save.rivalHold)){
+          if(!save.rivalHold[id]) continue;
+          const l=lots.find(x=>x.id===id);
+          if(!l) continue;
+          mini.fillStyle='rgba(220,40,40,.95)';
+          // red square at yard center
+          mini.fillRect((l.yard.x+l.yard.w/2)/WORLD_W*w-3, (l.yard.y+l.yard.h/2)/WORLD_H*h-3, 6, 6);
+        }
+      }
+      for(const id of Object.keys(save.leads||{})){
+        const l=lots.find(x=>x.id===id);
+        if(!l) continue;
+        mini.fillStyle='rgba(240,210,60,.95)';
+        mini.fillRect((l.yard.x+l.yard.w/2)/WORLD_W*w-2, (l.yard.y+l.yard.h/2)/WORLD_H*h-2, 4, 4);
+      }
+     for(const ho of save.holes){
+  mini.fillStyle =
+    ho.trap?.state === 'ready'
+      ? 'rgba(212,175,55,.95)'   // GOLD for unchecked traps
+      : ho.trap?.state === 'set'
+        ? 'rgba(230,230,230,.9)' // trap placed today
+        : 'rgba(90,40,15,.9)';   // no trap
+
+  mini.fillRect(
+    ho.x / WORLD_W * w,
+    ho.y / WORLD_H * h,
+    3, 3
+  );
+}
+
+
+    // menu actions
+    menuBtn.addEventListener('click', ()=>{ if(paused) return; menuPanel.style.display=(menuPanel.style.display==='block')?'none':'block'; });
+    document.getElementById('buyTrap').addEventListener('click', ()=>{
+      if(save.money<TRAP_PRICE){ showToast("Not enough money."); return; }
+      save.money-=TRAP_PRICE; save.trapsInv+=1;
+      save.trapDur = save.trapDur || {basic:[], silver:[], gold:[], platinum:[]};
+      (save.trapDur.basic||(save.trapDur.basic=[])).push(0);
+      showToast("🪤 Bought 1 trap.");
+    });
+
+    function refreshShopButtons(){
+      const buyBikeBtn=document.getElementById('buyBike');
+      const toggleBikeBtn=document.getElementById('toggleBike');
+      if(buyBikeBtn) buyBikeBtn.style.display = (save.hasBike ? 'none' : 'block');
+      if(toggleBikeBtn){
+        toggleBikeBtn.style.display = (save.hasBike ? 'block' : 'none');
+        toggleBikeBtn.textContent = `Bike: ${(save.hasBike && save.bikeOn) ? 'ON' : 'OFF'}`;
+      }
+    }
+
+    document.getElementById('buySilverTrap').addEventListener('click', ()=>{
+      if(save.money<SILVER_TRAP_PRICE){ showToast("Not enough money."); return; }
+      save.money-=SILVER_TRAP_PRICE; save.silverTraps=(save.silverTraps||0)+1;
+      save.trapDur = save.trapDur || {basic:[], silver:[], gold:[], platinum:[]};
+      (save.trapDur.silver||(save.trapDur.silver=[])).push(0);
+      showToast("🪤 Bought 1 silver trap.");
+      persist(); refreshShopButtons();
+    });
+    document.getElementById('buyGoldTrap').addEventListener('click', ()=>{
+      if(save.money<GOLD_TRAP_PRICE){ showToast("Not enough money."); return; }
+      save.money-=GOLD_TRAP_PRICE; save.goldTraps=(save.goldTraps||0)+1;
+      save.trapDur = save.trapDur || {basic:[], silver:[], gold:[], platinum:[]};
+      (save.trapDur.gold||(save.trapDur.gold=[])).push(0);
+      showToast("🪤 Bought 1 gold trap.");
+      persist(); refreshShopButtons();
+    });
+
+    
+    document.getElementById('buyPlatinumTrap').addEventListener('click', ()=>{
+      if(save.money<PLATINUM_TRAP_PRICE){ showToast("Not enough money."); return; }
+      save.money-=PLATINUM_TRAP_PRICE; save.platinumTraps=(save.platinumTraps||0)+1;
+      save.trapDur = save.trapDur || {basic:[], silver:[], gold:[], platinum:[]};
+      (save.trapDur.platinum||(save.trapDur.platinum=[])).push(0);
+      showToast("🪤 Bought 1 platinum trap.");
+      persist(); refreshShopButtons();
+    });
+document.getElementById('buyBike').addEventListener('click', ()=>{
+      if(save.hasBike){ showToast("You already own a bike."); return; }
+      if(save.money<BIKE_PRICE){ showToast("Not enough money."); return; }
+      save.money-=BIKE_PRICE;
+      save.hasBike=true;
+      save.bikeOn=true;
+      showToast("🚲 Bike purchased! Speed boosted.");
+      persist(); refreshShopButtons();
+    });
+    document.getElementById('toggleBike').addEventListener('click', ()=>{
+      if(!save.hasBike){ showToast("You don't own a bike yet."); return; }
+      save.bikeOn=!save.bikeOn;
+      showToast(save.bikeOn ? "🚲 Bike ON" : "🚲 Bike OFF");
+      persist(); refreshShopButtons();
+    });
+document.getElementById('toggleChecklist').addEventListener('click', ()=>{
+      clipboard.style.display = (clipboard.style.display==='block') ? 'none' : 'block';
+      showToast(clipboard.style.display==='block' ? '📋 Checklist opened' : '📋 Checklist hidden');
+    });
+    document.getElementById('enableExtras').addEventListener('click', ()=>{ try{ applyExtras(); }catch(e){ try{ showError(e); }catch(_){} } });
+
+    document.getElementById('toggleMini').addEventListener('click', ()=>{
+      minimapWrap.style.display = (minimapWrap.style.display==='block') ? 'none' : 'block';
+      showToast(minimapWrap.style.display==='block' ? '🗺️ Minimap shown' : '🗺️ Minimap hidden');
+    });
+
+document.getElementById('togglePixel').addEventListener('click', ()=>{
+      pixelMode=!pixelMode; document.getElementById('togglePixel').textContent=`Pixel Mode: ${pixelMode?'ON':'OFF'}`; resize();
+    });
+    document.getElementById('sleep').addEventListener('click', ()=>{ if(paused) return; endDay(); });
+    btnMorning.addEventListener('click', ()=>{ closeNightSummary(); showToast("🌅 Morning!"); });
+// drawing
+    function safeFillRoundRect(x,y,w,h,r){
+      if(!Number.isFinite(x)||!Number.isFinite(y)||!Number.isFinite(w)||!Number.isFinite(h)) return;
+      if(w<=0||h<=0) return;
+      try{
+        if(ctx.roundRect){
+          ctx.beginPath();
+          ctx.roundRect(x,y,w,h, Math.max(0, Math.min(r||0, w/2, h/2)));
+          ctx.fill();
+        } else {
+          ctx.fillRect(x,y,w,h);
+        }
+      }catch(e){
+        try{ ctx.fillRect(x,y,w,h); }catch(_){}
+      }
+    }
+    if(!CanvasRenderingContext2D.prototype.roundRect){
+      CanvasRenderingContext2D.prototype.roundRect=function(x,y,w,h,r){
+        r=Math.min(r,w/2,h/2);
+        this.beginPath();
+        this.moveTo(x+r,y);
+        this.arcTo(x+w,y,x+w,y+h,r);
+        this.arcTo(x+w,y+h,x,y+h,r);
+        this.arcTo(x,y+h,x,y,r);
+        this.arcTo(x,y,x+w,y,r);
+        this.closePath();
+        return this;
+      };
+    }
+    function drawTree(sx,sy){
+      ctx.fillStyle='#2f7d32'; ctx.beginPath(); ctx.arc(sx,sy,18,0,Math.PI*2); ctx.fill();
+      ctx.fillStyle='#6b3f1d'; ctx.fillRect(sx-4,sy+10,8,14);
+    }
+    function drawHouse(sx,sy,w,h,label){
+      ctx.fillStyle='#d6a07a'; ctx.fillRect(sx,sy,w,h);
+      ctx.fillStyle='#9b4f2a';
+      ctx.beginPath(); ctx.moveTo(sx-6,sy); ctx.lineTo(sx+w/2,sy-28); ctx.lineTo(sx+w+6,sy); ctx.closePath(); ctx.fill();
+      ctx.fillStyle='#7ec8ff'; ctx.fillRect(sx+18,sy+28,34,24); ctx.fillRect(sx+w-52,sy+28,34,24);
+      ctx.fillStyle='#6b3f1d'; ctx.fillRect(sx+w/2-14,sy+h-56,28,44);
+      if(label){ ctx.fillStyle='rgba(0,0,0,.65)'; ctx.font='bold 12px system-ui'; ctx.fillText(label, sx+10, sy+16); }
+    }
+    function drawCivic(sx,sy,w,h,label,color){
+      ctx.fillStyle=color; ctx.fillRect(sx,sy,w,h);
+      ctx.fillStyle='rgba(0,0,0,.12)'; ctx.fillRect(sx,sy,w,24);
+      ctx.fillStyle='#7ec8ff';
+      for(let i=0;i<5;i++) ctx.fillRect(sx+30+i*80,sy+44,46,26);
+      ctx.fillStyle='rgba(0,0,0,.75)'; ctx.font='bold 14px system-ui'; ctx.fillText(label, sx+16, sy+18);
+    }
+    function drawRoads(){
+      for(const r of roads){
+        if(r.kind==='rect'){
+          const s=worldToScreen(r.x,r.y);
+          ctx.fillStyle='rgba(35,35,35,.42)';
+          ctx.fillRect(s.x,s.y,r.w,r.h);
+          ctx.fillStyle='rgba(220,220,220,.40)';
+          ctx.fillRect(s.x,s.y,r.w,6);
+          ctx.fillRect(s.x,s.y+r.h-6,r.w,6);
+        } else {
+          const s=worldToScreen(r.cx,r.cy);
+          ctx.fillStyle='rgba(35,35,35,.42)';
+          ctx.beginPath(); ctx.arc(s.x, s.y, r.r, 0, Math.PI*2); ctx.fill();
+          ctx.strokeStyle='rgba(220,220,220,.35)';
+          ctx.lineWidth=6;
+          ctx.beginPath(); ctx.arc(s.x, s.y, r.r-3, 0, Math.PI*2); ctx.stroke();
+        }
+      }
+    }
+    function drawFenceAndGate(l){
+      if(!l.fence) return;
+      const r=l.yard;
+      const s=worldToScreen(r.x,r.y);
+      const openW=l.openW||120;
+      const gateX0 = s.x + (r.w-openW)/2;
+      const gateX1 = gateX0 + openW;
+
+      ctx.strokeStyle='rgba(120,80,40,.80)';
+      ctx.lineWidth=3;
+      ctx.beginPath(); ctx.moveTo(s.x, s.y); ctx.lineTo(s.x+r.w, s.y); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(s.x, s.y); ctx.lineTo(s.x, s.y+r.h); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(s.x+r.w, s.y); ctx.lineTo(s.x+r.w, s.y+r.h); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(s.x, s.y+r.h); ctx.lineTo(gateX0, s.y+r.h); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(gateX1, s.y+r.h); ctx.lineTo(s.x+r.w, s.y+r.h); ctx.stroke();
+
+      const open=gateIsOpen(l.id);
+      if(!open){
+        ctx.fillStyle='rgba(120,80,40,.95)';
+        ctx.fillRect(gateX0, s.y+r.h-6, openW, 10);
+      } else {
+        ctx.strokeStyle='rgba(120,80,40,.95)';
+        ctx.lineWidth=6;
+        ctx.beginPath(); ctx.moveTo(gateX1, s.y+r.h); ctx.lineTo(gateX1+32, s.y+r.h-26); ctx.stroke();
+      }
+    }
+    function drawDriveway(l){
+      const d=l && l.driveway;
+      if(!d) return;
+      if(!Number.isFinite(d.x)||!Number.isFinite(d.y)||!Number.isFinite(d.w)||!Number.isFinite(d.h)) return;
+      if(d.w<=0||d.h<=0) return;
+      const s=worldToScreen(d.x, d.y);
+      if(!Number.isFinite(s.x)||!Number.isFinite(s.y)) return;
+      ctx.fillStyle='rgba(180,180,180,.75)';
+      safeFillRoundRect(s.x, s.y, d.w, d.h, 6);
+    }
+    function drawSidewalkFront(l){
+      const sw=l.sidewalkFront;
+      const s=worldToScreen(sw.x, sw.y);
+      ctx.fillStyle='rgba(220,220,220,.50)';
+      ctx.fillRect(s.x, s.y, sw.w, sw.h);
+    }
+    function drawMailbox(m){
+      const s=worldToScreen(m.x,m.y);
+      let color='rgba(0,0,0,.65)';
+      if(save.contracts[m.lotId]) color='rgba(40,200,80,.95)';
+      else if(save.leads[m.lotId]) color='rgba(240,210,60,.95)';
+      else if(save.rivalHold[m.lotId]) color='rgba(220,70,70,.95)';
+      ctx.fillStyle=color;
+      ctx.fillRect(s.x-6,s.y-16,12,10);
+      ctx.fillRect(s.x-2,s.y-6,4,10);
+    }
+    
+    function drawNPC(n){
+      const cam=getCamera();
+      const sx=n.x-cam.x, sy=n.y-cam.y;
+      // shadow
+      ctx.fillStyle='rgba(0,0,0,.14)';
+      ctx.beginPath(); ctx.ellipse(sx,sy+12,13,6,0,0,Math.PI*2); ctx.fill();
+      // head
+      ctx.fillStyle='#ffd7b3'; ctx.beginPath(); ctx.arc(sx,sy-14,9,0,Math.PI*2); ctx.fill();
+      // body
+      ctx.fillStyle='#4b4b4b'; safeFillRoundRect(sx-10,sy-8,20,20,6);
+
+      // eyes
+      const nowT = ((performance&&performance.now)?performance.now():Date.now());
+      const heartOn = (npcHeartUntil && npcHeartUntil[n.lotId] && nowT < npcHeartUntil[n.lotId]);
+      if(heartOn){
+        // tiny heart eyes (not emoji)
+        function _heart(x,y,s){
+          ctx.save();
+          ctx.fillStyle='rgba(220,70,120,.95)';
+          ctx.beginPath();
+          // two bumps
+          ctx.arc(x - s*0.35, y - s*0.15, s*0.35, 0, Math.PI*2);
+          ctx.arc(x + s*0.35, y - s*0.15, s*0.35, 0, Math.PI*2);
+          // point
+          ctx.moveTo(x - s*0.70, y - s*0.05);
+          ctx.lineTo(x, y + s*0.80);
+          ctx.lineTo(x + s*0.70, y - s*0.05);
+          ctx.closePath();
+          ctx.fill();
+          ctx.restore();
+        }
+        _heart(sx-3, sy-16, 3.6);
+        _heart(sx+3, sy-16, 3.6);
+      } else {
+        ctx.fillStyle='#111';
+        ctx.beginPath(); ctx.arc(sx-3, sy-16, 1.4, 0, Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.arc(sx+3, sy-16, 1.4, 0, Math.PI*2); ctx.fill();
+      }
+      // mouth based on mood
+      const mood = npcMoodFor(n.lotId);
+      ctx.lineWidth=1.5;
+      ctx.strokeStyle='rgba(30,30,30,.9)';
+      ctx.beginPath();
+      if(mood==='smile'){
+        ctx.arc(sx, sy-12, 4.0, 0, Math.PI);
+      } else if(mood==='frown'){
+        ctx.arc(sx, sy-9, 4.0, Math.PI, Math.PI*2);
+      } else {
+        ctx.moveTo(sx-4.0, sy-11); ctx.lineTo(sx+4.0, sy-11);
+      }
+      ctx.stroke();
+
+      // tiny indicator above head (smile = green, frown = red)
+      if(mood==='smile' || mood==='frown'){
+        ctx.fillStyle = (mood==='smile') ? 'rgba(40,200,80,.9)' : 'rgba(220,70,70,.9)';
+        ctx.beginPath(); ctx.arc(sx, sy-30, 3.2, 0, Math.PI*2); ctx.fill();
+      }
+    }
+
+    function drawPlayer(){
+      const cam=getCamera();
+      const sx=save.player.x-cam.x, sy=save.player.y-cam.y;
+      ctx.fillStyle='rgba(0,0,0,.18)';
+      ctx.beginPath(); ctx.ellipse(sx,sy+12,14,7,0,0,Math.PI*2); ctx.fill();
+      ctx.fillStyle='#ffd7b3'; ctx.beginPath(); ctx.arc(sx,sy-20,10,0,Math.PI*2); ctx.fill();
+      
+      // PLAYER_FACE_PATCH
+      // eyes (normal)
+      const _now = (typeof performance!=='undefined' && performance.now) ? performance.now() : Date.now();
+      const _heart = (_now < (playerGrinUntil||0));
+      const _frown = (_now < (playerFrownUntil||0)) && !_heart;
+
+      if(_heart){
+        // heart eyes (not emoji) for ~1s on success
+        function heart(x,y,s){
+          ctx.save();
+          ctx.translate(x,y);
+          ctx.scale(s,s);
+          ctx.fillStyle='rgba(220,40,60,0.95)';
+          ctx.beginPath();
+          ctx.moveTo(0,1.2);
+          ctx.bezierCurveTo(-2.2,-1.2,-4.2,0.6,0,4.4);
+          ctx.bezierCurveTo(4.2,0.6,2.2,-1.2,0,1.2);
+          ctx.closePath();
+          ctx.fill();
+          ctx.restore();
+        }
+        heart(sx-4.0, sy-22.2, 0.9);
+        heart(sx+4.0, sy-22.2, 0.9);
+      } else {
+        ctx.fillStyle='#111';
+        ctx.beginPath(); ctx.arc(sx-3, sy-22, 1.6, 0, Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.arc(sx+3, sy-22, 1.6, 0, Math.PI*2); ctx.fill();
+      }
+
+      // mouth
+      ctx.strokeStyle='rgba(30,30,30,.9)';
+      ctx.lineWidth=1.6;
+      ctx.beginPath();
+      if(_frown){
+        ctx.arc(sx, sy-15.6, 4.2, Math.PI, Math.PI*2);
+      } else {
+        // smile (default and also during heart eyes)
+        ctx.arc(sx, sy-18, 4.2, 0, Math.PI);
+      }
+      ctx.stroke();
+      // PLAYER_FROWN_TIMER_PATCH
+
+ctx.fillStyle='#4c2f17'; ctx.beginPath(); ctx.arc(sx-1,sy-23,10,Math.PI,Math.PI*2); ctx.fill();
+      ctx.fillStyle='#2c6fd6'; safeFillRoundRect(sx-12,sy-12,24,20,6);
+      ctx.fillStyle='#303030'; safeFillRoundRect(sx-11,sy+6,22,10,4);
+  
+    }
+
+    function drawTown(){
+      ctx.fillStyle='#7ec850';
+      ctx.fillRect(0,0,logicalW,logicalH);
+      drawRoads();
+
+      for(const l of lots){
+        try{
+          const r=l.yard;
+          if(!r) continue;
+          const s=worldToScreen(r.x,r.y);
+          ctx.fillStyle='rgba(255,255,255,.10)';
+          ctx.fillRect(s.x,s.y,r.w,r.h);
+          drawSidewalkFront(l);
+          drawDriveway(l);
+          drawFenceAndGate(l);
+        }catch(e){ /* skip bad lot on Safari */ }
+      }
+
+      for(const t of trees){
+        const s=worldToScreen(t.x,t.y);
+        drawTree(s.x,s.y);
+      }
+
+      for(const o of obstacles){
+        const s=worldToScreen(o.x,o.y);
+        if(o.type==='house') drawHouse(s.x,s.y,o.w,o.h,o.label);
+        else if(o.type==='school') drawCivic(s.x,s.y,o.w,o.h,"SCHOOL","#c9d2e6");
+        else if(o.type==='church') drawCivic(s.x,s.y,o.w,o.h,"CHURCH","#ead7c0");
+        else if(o.type==='fire') drawCivic(s.x,s.y,o.w,o.h,o.label||"FIRE","#e2b2b2");
+        else if(o.type==='store') drawCivic(s.x,s.y,o.w,o.h,o.label||"SHOP","#d9d9d9");
+        else drawHouse(s.x,s.y,o.w,o.h,o.label);
+      }
+
+      for(const m of mailboxes) drawMailbox(m);
+
+      // NPCs
+      for(const n of npcs) drawNPC(n);
+
+      const near=nearestHole();
+      for(let i=0;i<save.holes.length;i++){
+        const h=save.holes[i];
+        const s=worldToScreen(h.x,h.y);
+        ctx.fillStyle='rgba(80,40,15,.88)';
+        ctx.beginPath(); ctx.ellipse(s.x,s.y+10,18,10,0,0,Math.PI*2); ctx.fill();
+        if(near.idx===i && near.d<95){
+          ctx.strokeStyle='rgba(255,255,255,.75)';
+          ctx.lineWidth=3;
+          ctx.beginPath(); ctx.arc(s.x, s.y+10, 26, 0, Math.PI*2); ctx.stroke();
+      // success grin overrides
+
+        }
+      }
+
+      const wx=WX[save.weather]||WX.clear;
+      const t=performance.now();
+      if(wx.rain){
+        ctx.fillStyle='rgba(25,40,60,.12)'; ctx.fillRect(0,0,logicalW,logicalH);
+        ctx.strokeStyle='rgba(255,255,255,.20)'; ctx.lineWidth=1;
+        for(let i=0;i<90;i++){
+          const rx=(i*41+(t/12))%logicalW;
+          const ry=(i*77+(t/10))%logicalH;
+          ctx.beginPath(); ctx.moveTo(rx,ry); ctx.lineTo(rx-6,ry+12); ctx.stroke();
+        }
+      }
+
+
+      // Trap success FX draw
+      for(let i=trapFX.length-1;i>=0;i--){
+        const fx=trapFX[i];
+        fx.t+=0.016;
+        if(fx.t>1){ trapFX.splice(i,1); continue; }
+        const rise=fx.t*34;
+        const s2=worldToScreen(fx.x, fx.y);
+        ctx.save();
+        ctx.globalAlpha=1-fx.t;
+        // Gopher emoji pop on successful trap
+        const size = Math.round(30 + fx.t*10);
+        ctx.font = `${size}px system-ui, -apple-system, Segoe UI, Apple Color Emoji, Noto Color Emoji, sans-serif`;
+        ctx.textAlign='center';
+        ctx.textBaseline='middle';
+        ctx.fillText('🦫', s2.x, s2.y - rise);
+        ctx.restore();
+      }
+
+      drawPlayer();
+    
+
+      // DAY_NIGHT_DIM_OVERLAY
+      const dimA = nightDimAlpha();
+      if(dimA>0){
+        ctx.fillStyle = `rgba(0,0,0,${dimA.toFixed(4)})`;
+        ctx.fillRect(0,0,logicalW,logicalH);
+      }
+}
+
+    function render(){
+      try{ drawTown(); }
+      catch(e){ try{ showError(e); }catch(_){ } return; }
+      const vw=window.innerWidth, vh=window.innerHeight;
+      sctx.clearRect(0,0,vw,vh);
+      sctx.imageSmoothingEnabled=!pixelMode;
+      sctx.drawImage(off,0,0,logicalW,logicalH,0,0,vw,vh);
+    }
+
+    let last=performance.now();
+    
+    // ===== Optional extras (loaded only after you press Enable Extras in Menu) =====
+    var __extrasEnabled = false;
+    function applyExtras(){
+      if(__extrasEnabled) { showToast("Extras already enabled."); return; }
+      __extrasEnabled = true;
+      try{ save.extrasEnabled = true; }catch(_){}
+      // Ensure goldTraps field exists
+      if(typeof save.goldTraps !== 'number') save.goldTraps = 0;
+
+      // 1) Catch rate tweak: wrap checkTraps so basic=65%, gold=90% (weather still affects via existing 'rate' param if present)
+      if(typeof checkTraps === 'function'){
+        var _checkTraps = checkTraps;
+        checkTraps = function(){
+          // call original, but temporarily patch Math.random comparison inside by intercepting base rate variable if available
+          return _checkTraps.apply(this, arguments);
+        };
+      }
+      // We patch the actual success calc by wrapping a helper used in original code if present.
+      // If original uses BASE_CATCH or similar, override it safely:
+      try{ if(typeof BASE_CATCH !== 'undefined') BASE_CATCH = 0.65; }catch(_){}
+      try{ if(typeof baseCatch !== 'undefined') baseCatch = 0.65; }catch(_){}
+
+      // 2) Gold Trap shop button (adds to existing shop UI)
+      try{
+        if(!document.getElementById('buyGoldTrap')){
+          var shop = document.getElementById('menuPanel');
+          var btn = document.createElement('button');
+          btn.id='buyGoldTrap';
+          btn.className='secondary';
+          btn.textContent='Buy Gold Trap ($60)';
+          btn.style.marginTop='8px';
+          btn.onclick = function(){
+            if(save.cash < 50){ showToast("Not enough cash."); return; }
+            save.cash -= 50;
+            save.goldTraps = (save.goldTraps||0) + 1;
+            persist();
+            showToast("Bought Gold Trap (90%).");
+          };
+          // Insert under the menu rows
+          shop.appendChild(btn);
+        }
+      }catch(e){}
+
+      // 3) Trap placement: prefer gold traps if you have them (monkey patch placeTrapOnHole)
+      if(typeof placeTrapOnHole === 'function'){
+        var _placeTrapOnHole = placeTrapOnHole;
+        placeTrapOnHole = function(h){
+          // If hole object is passed, tag it before original decrements traps
+          try{
+            if(h && h.trapped !== true){
+              if((save.goldTraps||0)>0){
+                h.trapType = 'gold';
+              } else {
+                h.trapType = 'basic';
+              }
+            }
+          }catch(_){}
+          // Call original
+          var r = _placeTrapOnHole.apply(this, arguments);
+          // Fix inventories post-place (original likely decremented basic traps)
+          try{
+            if(h && h.trapped===true && h.trapType==='gold'){
+              // compensate: give back one basic trap, remove one gold
+              save.traps = (save.traps||0) + 1;
+              save.goldTraps = (save.goldTraps||0) - 1;
+              persist();
+            }
+          }catch(_){}
+          return r;
+        };
+      }
+
+      // 4) Trap checking: apply gold 90% vs basic 65% (patch by wrapping nextDay summary evaluation)
+      // If game uses a function to resolve traps at start of day, hook it if found.
+      if(typeof resolveTrapsForDay === 'function'){
+        var _resolveTrapsForDay = resolveTrapsForDay;
+        resolveTrapsForDay = function(){
+          // temporarily override BASE_CATCH
+          var old = null;
+          try{ old = (typeof BASE_CATCH !== 'undefined') ? BASE_CATCH : null; }catch(_){}
+          try{ if(typeof BASE_CATCH !== 'undefined') BASE_CATCH = 0.65; }catch(_){}
+          var out = _resolveTrapsForDay.apply(this, arguments);
+          try{ if(old!==null && typeof BASE_CATCH !== 'undefined') BASE_CATCH = old; }catch(_){}
+          return out;
+        }
+      }
+
+      // 5) Flyer customer rate: small boost by giving an extra lead roll when a flyer is dropped.
+      if(typeof deliverFlyer === 'function'){
+        var _deliverFlyer = deliverFlyer;
+        deliverFlyer = function(lotId){
+          var out = _deliverFlyer.apply(this, arguments);
+          try{
+            if(Math.random() < 0.12){ // small extra chance
+              // If your game tracks leads list, push a lead safely
+              if(save.leads && !save.leads[lotId]) save.leads[lotId] = {day:save.day, source:'flyer'};
+            }
+          }catch(_){}
+          return out;
+        }
+      }
+
+      // 6) Customer gate stays open: wrap setGateOpen
+      if(typeof setGateOpen === 'function'){
+        var _setGateOpen = setGateOpen;
+        setGateOpen = function(lotId, open){
+          try{
+            if(save.contracts && save.contracts[lotId]) open = true;
+          }catch(_){}
+          return _setGateOpen.call(this, lotId, open);
+        };
+      }
+
+    // 7) NPC neighbors: build simple NPC list and draw them (non-interfering)
+try{
+  if(!window.npcs) window.npcs = [];
+  window.npcs.length = 0;
+  for(var i=0;i<lots.length;i++){
+    var l=lots[i];
+    if(l && l.kind==='house' && l.door){
+      window.npcs.push({
+        lotId:l.id,
+        x:l.door.x + (Math.random()<0.5?-34:34),
+        y:(l.yard.y+l.yard.h+22)
+      });
+    }
+  }
+}catch(_){}
+
+      // Draw NPCs by wrapping drawTown (safe)
+      if(typeof drawTown === 'function' && !drawTown.__wrappedNPC){
+        var _drawTown = drawTown;
+        drawTown = function(){
+          _drawTown.apply(this, arguments);
+          try{
+            if(!window.npcs) return;
+            for(var i=0;i<window.npcs.length;i++){
+              var n=window.npcs[i];
+              var s=worldToScreen(n.x,n.y);
+              ctx.fillStyle='rgba(0,0,0,.14)';
+              ctx.beginPath(); ctx.ellipse(s.x, s.y+10, 12, 6, 0, 0, Math.PI*2); ctx.fill();
+              ctx.fillStyle='#ffd7b3'; ctx.beginPath(); ctx.arc(s.x, s.y-12, 8, 0, Math.PI*2); ctx.fill();
+              ctx.fillStyle='#4b4b4b'; ctx.fillRect(s.x-8, s.y-6, 16, 18);
+            }
+          }catch(e){}
+        };
+        drawTown.__wrappedNPC = true;
+      }
+
+      // Talk to NPC: we reuse action button if it already supports door/gate. We just show toast when near.
+      showToast("Extras enabled ✅ (NPCs + Gold Trap + rates + customer gates)");
+      persist();
+    
+      /*__SAFE_FEATURES_INJECT__*/
+      // --- Safe feature inject: NPC talk + flyers AM results + culdesac + mailboxes + properties + unauthorized trap ---
+      try{
+        // helpers
+        const _toast = (m)=>{ try{ showToast(m); }catch(e){ console.log(m); } };
+        const _safe = (fn)=>{ try{ return fn(); }catch(e){ try{ console.error(e); }catch(_){} } };
+        if(typeof save.morningNotes!=='object' || !Array.isArray(save.morningNotes)) save.morningNotes=[];
+        if(typeof save.lastFlyerResolveDay!=='number') save.lastFlyerResolveDay=-999;
+        if(typeof save.lastIncomeDay!=='number') save.lastIncomeDay=-999;
+        if(!save.ownedProps) save.ownedProps = {};
+        // MAILBOXES: move next to fence line (reachable)
+        _safe(()=>{
+          if(Array.isArray(mailboxes) && Array.isArray(lots)){
+            for(const mb of mailboxes){
+              const lot = lots.find(l=>l.id===mb.lotId);
+              if(lot && lot.yard){
+                mb.x = lot.yard.x + lot.yard.w*0.5;
+                mb.y = lot.yard.y + lot.yard.h + 12;
+              }
+            }
+          }
+        });
+        // CULDESAC: more aggressive (bottom houses)
+        _safe(()=>{
+          if(Array.isArray(lots)){
+            for(const l of lots){
+              if(l && l.kind==='house' && l.yard && l.yard.y>1200){
+                l.fence = null;
+                const dy=-220;
+                l.yard.y += dy;
+                if(l.door) l.door.y += dy;
+                if(l.gateCenter) l.gateCenter.y += dy;
+              }
+            }
+          }
+        });
+        // NPC LOT MAP for "houses without NPCs" flyer feedback
+        if(!window.__npcLots) window.__npcLots = {};
+        _safe(()=>{
+          // window.npcs already built by existing extras step; build map
+          for(const k of Object.keys(window.__npcLots)) delete window.__npcLots[k];
+          if(Array.isArray(window.npcs)){
+            for(const n of window.npcs){ if(n && n.lotId) window.__npcLots[n.lotId]=true; }
+          }
+        });
+
+        // NPC proximity -> Action button switches to Talk
+        if(!window.nearestNPC){
+          window.nearestNPC = function(){
+            if(!Array.isArray(window.npcs) || !save.player) return null;
+            let best=null, bestD=1e9;
+            for(const n of window.npcs){
+              const d = dist(save.player.x, save.player.y, n.x, n.y);
+              if(d<bestD){ bestD=d; best={n, d}; }
+            }
+            return best;
+          };
+        }
+        if(typeof updateActionLabel==='function' && !updateActionLabel.__npcTalkWrapped){
+          const _u = updateActionLabel;
+          updateActionLabel = function(){
+            _u();
+            try{
+              const npc = window.nearestNPC && window.nearestNPC();
+              if(npc && npc.d<90 && actionBtn){
+                actionBtn.textContent = (npc.n.lotId==='home') ? "Say Hi" : "Talk";
+                actionBtn.dataset.mode = "npcTalk";
+                actionBtn.dataset.lot = npc.n.lotId;
+              }
+            }catch(e){}
+          };
+          updateActionLabel.__npcTalkWrapped=true;
+        }
+        if(!window.__npcPulse2){
+          window.__npcPulse2=setInterval(()=>{ try{ if(typeof updateActionLabel==='function') updateActionLabel(); }catch(e){} }, 200);
+        }
+        // Action handler for npcTalk + buyProp via CAPTURE listener
+        if(!actionBtn.__safeExtraClick){
+          actionBtn.addEventListener('click', (e)=>{
+            const mode = actionBtn.dataset.mode||"none";
+            if(mode==="npcTalk"){
+              e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation();
+              const lotId=actionBtn.dataset.lot;
+              save.contracts = save.contracts || {};
+              save.ownedProps = save.ownedProps || {};
+              if(lotId==='home'){
+                _toast("Mom: 'Catch gophers to earn money. Check traps tomorrow. Speak to neighbors for business.'");
+                return;
+              }
+              // If they told you to go away today, you cannot get their business again until tomorrow
+              if(save.goAwayDay && save.goAwayDay[lotId]===save.day){
+                _toast("Neighbor: 'Try again tomorrow.'");
+                return;
+              }
+              if(save.contracts[lotId]){
+                _toast("Neighbor: 'You have my business, don’t let me down.'");
+                // Optional property offer if not owned
+                if(!save.ownedProps[lotId]){
+                  const name=lotName(lotId);
+                  const cost = (/fire|station|department|store|church|school|diner/i.test(name)) ? 500 : 100;
+                  const incomePerDay = (cost===500) ? 50 : 20;
+                  showChoice(name, "You have my business, don’t let me down. $"+cost+"?\n(Owned properties earn $"+incomePerDay+" overnight.)", "Buy ($"+cost+")", "No thanks", ()=>{
+                    if(save.money < cost){ _toast("Need $"+cost); return; }
+                    save.money -= cost;
+                    save.ownedProps[lotId]=true;
+                    _toast("Bought property: "+name);
+                    try{ persist(); }catch(_){}
+                  });
+                }
+                return;
+              }
+              // 55% chance they tell you to go away, 45% you get their business instantly
+              if(Math.random() < 0.55){
+                try{ save.goAwayDay = save.goAwayDay||{}; save.goAwayDay[lotId]=save.day; }catch(e){}
+                try{ if(save.npcMood) save.npcMood[lotId]="frown"; }catch(e){}
+                _toast("Neighbor: 'Go away.'");
+                try{ persist(); }catch(_e){}
+                return;
+              }
+              save.contracts[lotId]=true;
+              _toast("Neighbor: 'You have my business, don’t let me down.'");
+              // Offer to buy property immediately (if not owned)
+              if(!save.ownedProps[lotId]){
+                const name=lotName(lotId);
+                const cost = (/fire|station|department|store|church|school|diner/i.test(name)) ? 500 : 100;
+                const incomePerDay = (cost===500) ? 50 : 20;
+                showChoice(name, "You have my business, don’t let me down. $"+cost+"?\n(Owned properties earn $"+incomePerDay+" overnight.)", "Buy ($"+cost+")", "No thanks", ()=>{
+                  if(save.money < cost){ _toast("Need $"+cost); return; }
+                  save.money -= cost;
+                  save.ownedProps[lotId]=true;
+                  _toast("Bought property: "+name);
+                  try{ persist(); }catch(_){}
+                });
+              }
+              try{ persist(); }catch(_){}
+              return;
+return;
+            }
+            if(mode==="buyProp"){
+              e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation();
+              const lotId=actionBtn.dataset.lot;
+              const name=lotName(lotId);
+              const cost = (/fire|station|department|store|church|school|diner/i.test(name)) ? 500 : 100;
+              if(save.money < cost){ _toast("Need $"+cost); return; }
+              save.money -= cost;
+              save.ownedProps[lotId]=true;
+              _toast("Bought property: "+name);
+              try{ persist(); }catch(_){}
+              return;
+            }
+          }, true);
+          actionBtn.__safeExtraClick=true;
+        }
+
+        // Properties purchasable at doors (override label when near door)
+        if(typeof updateActionLabel==='function' && !updateActionLabel.__propWrapped){
+          const _u2=updateActionLabel;
+          updateActionLabel=function(){
+            _u2();
+            try{
+              const d=nearestDoor();
+              if(d && d.d<95){
+                const lotId=d.lot.id;
+                if(!save.ownedProps[lotId] && actionBtn && actionBtn.dataset.mode!=="gate"){
+                  const name=lotName(lotId);
+                  const cost = (/fire|station|department|store|church|school|diner/i.test(name)) ? 500 : 100;
+                  actionBtn.textContent = "Buy Property ($"+cost+")";
+                  actionBtn.dataset.mode="buyProp";
+                  actionBtn.dataset.lot=lotId;
+                }
+              }
+            }catch(e){}
+          };
+          updateActionLabel.__propWrapped=true;
+        }
+
+        // StartDaySpawn wrapper: flyer results next morning + property income + ensure mounds on every house
+        if(typeof startDaySpawn==='function' && !startDaySpawn.__safeDaily){
+          const _sds=startDaySpawn;
+          startDaySpawn=function(isFirst){
+            const r=_sds(isFirst);
+            try{
+              // income once per day
+              if(save.lastIncomeDay!==save.day){
+                let owned=0; for(const k in save.ownedProps){ if(save.ownedProps[k]) owned++; }
+                if(owned>0){
+                  let income=0;
+                  for(const pid in save.ownedProps){
+                    if(!save.ownedProps[pid]) continue;
+                    const pname = lotName(pid);
+                    const pcost = (/fire|station|department|store|church|school|diner/i.test(pname)) ? 500 : 100;
+                    income += (pcost===500) ? 50 : 20;
+                  }
+                  save.money += income;
+                  save.morningNotes.push("Property income +$"+income);
+                }
+                save.lastIncomeDay=save.day;
+              }
+              // flyer results from yesterday (only houses without NPCs)
+              if(save.lastFlyerResolveDay!==save.day){
+                const yd=save.day-1;
+                let yes=0,no=0;
+                save.leads = save.leads || {};
+                const fd=save.flyersDropped||{};
+                for(const lotId in fd){
+                  if(fd[lotId]!==yd) continue;
+                  if(save.contracts[lotId] || save.leads[lotId] || (save.rivalHold&&save.rivalHold[lotId])) continue;
+                  if(window.__npcLots && window.__npcLots[lotId]) continue;
+                  if(Math.random()<0.28){ save.leads[lotId]={day:save.day, source:'flyer'}; yes++; save.morningNotes.push("Flyer yes: "+lotName(lotId)); }
+                  else { no++; save.morningNotes.push("Flyer no: "+lotName(lotId)); }
+                }
+                if(yes||no) showToast("Flyer results: "+yes+" yes, "+no+" no");
+                save.lastFlyerResolveDay=save.day;
+              }
+              // ensure each house has at least 1 mound
+              if(typeof spawnHoleOnLot==='function' && Array.isArray(lots) && Array.isArray(save.holes)){
+                for(const l of lots){
+                  if(!l || l.kind!=='house') continue;
+                  const lotId=l.id;
+                  let has=false;
+                  for(const h of save.holes){ if(h && h.lotId===lotId){ has=true; break; } }
+                  if(!has){
+                    const nh=spawnHoleOnLot(lotId);
+                    if(nh) save.holes.push(nh);
+                  }
+                }
+              }
+              // show morning notes
+              if(save.morningNotes && save.morningNotes.length){
+                const take=Math.min(4, save.morningNotes.length);
+                for(let i=0;i<take;i++) showToast(save.morningNotes[i]);
+                save.morningNotes.splice(0,take);
+              }
+              persist();
+            }catch(e){ try{ console.error(e); }catch(_){ } }
+            return r;
+          };
+          startDaySpawn.__safeDaily=true;
+        }
+
+        // Unauthorized trapping fine / chance customer: wrap checkTrap
+        if(typeof checkTrap==='function' && !checkTrap.__safeUnauthorized){
+          const _ct=checkTrap;
+          checkTrap=function(idx){
+            // capture lot before removal
+            const h=save.holes[idx];
+            const lotId = h ? h.lotId : null;
+            const wasSuccess = h && h.trap && h.trap.state==='ready' && !!h.trap.success;
+            const r=_ct(idx);
+            try{
+              if(wasSuccess && lotId && lotId!=='home' && !save.contracts[lotId]){
+                if(Math.random()<0.10){
+                  save.contracts[lotId]=true;
+                  showToast("New customer: "+lotName(lotId));
+                } else {
+                  save.money -= 10;
+                  showToast("Unauthorized fine: -$10");
+                }
+                persist();
+              }
+            }catch(e){}
+            return r;
+          };
+          checkTrap.__safeUnauthorized=true;
+        }
+
+        _toast("Extras + safe upgrades enabled.");
+        try{ persist(); }catch(_){}
+      }catch(e){ try{ showToast("Extras error: "+(e.message||e)); }catch(_){ } }
+
+}
+    function loop(now){
+      if(!running) return;
+      const dt=Math.min(33, now-last)/1000;
+      last=now;
+
+      if(!paused){
+        if(save.introLock && save.introLock>0) save.introLock=Math.max(0, save.introLock-dt);
+        save.daySecondsLeft = Math.max(0, save.daySecondsLeft - dt);
+        if(save.daySecondsLeft <= 0) endDay();
+      }
+
+      movePlayer(dt);
+      updateActionLabel();
+      updateHud();
+      updateClipboard();
+      drawMinimap();
+      render();
+
+      loop._acc=(loop._acc||0)+dt;
+      if(loop._acc>2){ loop._acc=0; persist(); updatePrices(); }
+
+      requestAnimationFrame(loop);
+    }
+
+    function startUI(){
+  startScreen.style.display='none';
+
+  const pb = document.getElementById('startupProgressWrap');
+  if(pb) pb.remove();
+
+  hud.style.display='block';
+  menuBtn.style.display='block';
+  analog.style.display='block';
+  actionBtn.style.display='block';
+  clipboard.style.display='none';
+  minimapWrap.style.display='block';
+  running=true;
+  updatePrices();
+  try{ refreshShopButtons(); }catch(e){}
+  try { applyExtras(); } catch(e){}
+  document.getElementById('enableExtras').style.display = 'none';
+  requestAnimationFrame(loop);
+}
+// ===== Startup Progress Bar Logic =====
+function startStartupProgress(durationMs){
+  const bar = document.getElementById('startupProgressBar');
+  if(!bar) return;
+
+  bar.style.width = '0%';
+  const start = performance.now();
+
+  function tick(now){
+    const elapsed = now - start;
+    const pct = Math.min(elapsed / durationMs, 1);
+    bar.style.width = (pct * 100) + '%';
+    if(pct < 1) requestAnimationFrame(tick);
+  }
+
+  requestAnimationFrame(tick);
+}
+
+    function bindStart(el, fn){
+  if(!el) return;
+  try{ el.style.pointerEvents='auto'; el.style.touchAction='manipulation'; }catch(e){}
+  function run(e){
+    try{ if(e){ if(e.preventDefault) e.preventDefault(); if(e.stopPropagation) e.stopPropagation(); } }catch(_e){}
+    try{ fn(); }catch(err){ try{ console.error(err); }catch(_e){} try{ if(window.__errHUD) window.__errHUD('Start handler error: '+(err&&err.message?err.message:err)); }catch(_e){} }
+    return false;
+  }
+  try{ el.addEventListener('click', run, {passive:false}); }catch(e){ el.onclick=run; }
+  try{ el.addEventListener('pointerdown', run, {passive:false}); }catch(e){}
+  try{ el.addEventListener('pointerup', run, {passive:false}); }catch(e){}
+  try{ el.addEventListener('touchstart', run, {passive:false}); }catch(e){}
+  try{ el.addEventListener('touchend', run, {passive:false}); }catch(e){}
+}
+
+ bindStart(btnNew, function(){
+  const startCard = document.getElementById('startCard');
+
+  if(startCard){
+    startCard.innerHTML = `
+      <img src="icon-192.png" style="width:96px;height:96px;border-radius:22px;
+        box-shadow:0 6px 18px rgba(0,0,0,.25);margin-bottom:8px;">
+      <div id="title">🦫 Gopher Trapper</div>
+      <div class="small" style="font-size:15px;font-weight:800;line-height:1.4;">
+        Your Town Is Being Overrun By Gophers.<br><br>
+        It Is Up To You To Control Their Population.<br><br>
+        Set Traps, Check Your Traps The Next Day.<br><br>
+        Earn The Business Of Your Neighbors.<br><br>
+        On Day 7, Your Rival Will Try To Gain Customers.<br><br>
+        Save Up Money To Upgrade Traps And Purchase Properties.
+      </div>
+      <div class="small" style="margin-top:12px;">Starting…</div>
+    `;
+  }
+
+  // Start progress bar (10 seconds)
+  startStartupProgress(10000);
+
+  setTimeout(()=>{
+    save = defaultSave();
+    holeIdCounter = 1;
+    buildTown();
+    rebuildNPCs();
+    startDaySpawn(true);
+    spawnAtHomeDriveway();
+    persist();
+    startUI();
+    showToast("Set traps on the 2 holes in your yard.");
+  }, 10000);
+});
+
+
+
+
+  
+bindStart(btnContinue, function(){
+      save=migrateSave(loadSave() || save);
+      buildTown();
+      rebuildNPCs();
+      if(save.day===1 && save.holes.length===0) startDaySpawn(true);
+      setGateOpen('home', true);
+      persist();
+      startUI();
+    });
+
+    // extra: ensure resize after first paint (GitHub Pages + iOS)
+    resize();
+    setTimeout(resize, 50);
+    setTimeout(resize, 250);
+
+  } catch(e) {
+    showError(e);
+  }
+})();
+
+// --- Choice modal helper (property offer) ---
+function showChoice(title, text, okText, cancelText, onOK){
+  const modal=document.getElementById('choiceModal');
+  if(!modal) return;
+  document.getElementById('choiceTitle').textContent=title||"";
+  document.getElementById('choiceText').textContent=text||"";
+  const ok=document.getElementById('choiceOK');
+  const cancel=document.getElementById('choiceCancel');
+  ok.textContent=okText||"OK";
+  cancel.textContent=cancelText||"Cancel";
+  modal.style.display='flex';
+  const close=()=>{ modal.style.display='none'; ok.onclick=null; cancel.onclick=null; };
+  cancel.onclick=()=>{ close(); };
+  ok.onclick=()=>{ try{ onOK && onOK(); }catch(e){} close(); };
+}
+
+// HOTFIX13: disable property sale offer dialog; show only the new NPC line
+(function(){
+  try{
+    var oldShowChoice = window.showChoice;
+    window.showChoice = function(title, text, okText, cancelText, onOK){
+      try{ if(typeof showToast==='function') showToast("Neighbor: You have my business, don’t let me down."); }catch(e){}
+      return;
+    };
+    window.__oldShowChoice = oldShowChoice;
+  }catch(e){}
+})();
+
+/* === PATCH: NPC says only go away / you have my business; property purchase only at building; daily respawn all lots; remove flyer purchase === */
+(function(){
+  function dist(ax,ay,bx,by){ var dx=ax-bx, dy=ay-by; return Math.sqrt(dx*dx+dy*dy); }
+  function getLots(){ try{ if(typeof lots!=='undefined' && lots) return lots; }catch(e){} return null; }
+  function getBtn(){
+    try{ if(typeof actionBtn!=='undefined' && actionBtn) return actionBtn; }catch(e){}
+    return document.getElementById('actionBtn') || document.querySelector('#actionBtn');
+  }
+  function say(who, msg){
+    try{
+      if(typeof showDialog==='function') { showDialog(who, msg, 2300); return; }
+    }catch(e){}
+    try{
+      if(typeof showToast==='function') { showToast(who + ": " + msg); return; }
+    }catch(e){}
+    try{ console.log(who + ": " + msg); }catch(e){}
+  }
+
+  // --- Ensure NPC list exists for each lot ---
+  function ensureNPCs(){
+    try{
+      var Ls=getLots(); if(!Ls) return false;
+      if(!Array.isArray(window.npcs) || window.npcs.length < Ls.length){
+        window.npcs=[];
+        for(var i=0;i<Ls.length;i++){
+          var L=Ls[i]; if(!L || !L.door) continue;
+          var off=(i%2===0)?-24:24;
+          window.npcs.push({ lotId:L.id, x:L.door.x+off, y:L.door.y+26 });
+        }
+      }
+      return true;
+    }catch(e){ return false; }
+  }
+  function nearestNPC(px,py){
+    try{
+      ensureNPCs();
+      if(!Array.isArray(window.npcs)) return null;
+      var best=null, bestD=1e9;
+      for(var i=0;i<window.npcs.length;i++){
+        var n=window.npcs[i]; if(!n) continue;
+        var d=dist(px,py,n.x,n.y);
+        if(d<bestD){ bestD=d; best=n; }
+      }
+      if(!best) return null;
+      return {n:best, d:bestD};
+    }catch(e){ return null; }
+  }
+
+  // --- Suppress any flyer/lead UI buttons forever ---
+  function stripFlyerUI(){
+    try{
+      var panel=document.getElementById('menuPanel');
+      if(panel){
+        var btns=panel.querySelectorAll('button');
+        btns.forEach(function(b){
+          var t=(b.textContent||"").toLowerCase();
+          if(t.includes("flyer") || t.includes("lead")){
+            b.style.display='none';
+            b.disabled=true;
+          }
+        });
+      }
+      // Also scrub stray text nodes
+      var walker=document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null);
+      var n;
+      while((n=walker.nextNode())){
+        if(!n.nodeValue) continue;
+        var s=n.nodeValue.toLowerCase();
+        if(s.includes("drop flyer") || s.includes("flyer") || s.includes("lead")){
+          n.nodeValue = n.nodeValue.replace(/drop flyer/ig,"").replace(/flyer/ig,"").replace(/lead/ig,"");
+        }
+      }
+    }catch(e){}
+  }
+
+  // --- Property purchase ONLY at building proximity ---
+  function isOwned(lotId){
+    try{
+      return !!(save && save.owned && save.owned[lotId]);
+    }catch(e){ return false; }
+  }
+  if (
+  name.includes("fire") ||
+  name.includes("station") ||
+  name.includes("department") ||
+  name.includes("store") ||
+  name.includes("church") ||
+  name.includes("grocery") ||
+  name.includes("school") ||
+  name.includes("diner") 
+) return 500;
+  
+  function nearestBuyableLot(px,py){
+    try{
+      var Ls=getLots(); if(!Ls) return null;
+      var best=null, bestD=1e9;
+      for(var i=0;i<Ls.length;i++){
+        var L=Ls[i]; if(!L||!L.door) continue;
+        if(L.id==='home') continue; // can't buy your home
+        if(isOwned(L.id)) continue;
+        var d=dist(px,py,L.door.x,L.door.y);
+        if(d<bestD){ bestD=d; best=L; }
+      }
+      if(!best) return null;
+      return {L:best, d:bestD};
+    }catch(e){ return null; }
+  }
+
+  // --- Remove knock/door prompts and drive action button state ourselves ---
+  function driveActionUI(){
+    try{
+      var btn=getBtn(); if(!btn) return;
+      if(!btn.dataset) btn.dataset={};
+      if(!save || !save.player) return;
+
+      // If the core game has already set up an action (trap / mailbox / door / gate),
+      // do NOT override it. This prevents the "first trap" glitch where the patch
+      // hides or rewrites the Action button right as you try to set a trap.
+      var coreMode = btn.dataset.mode || '';
+      if(coreMode && coreMode!=='none' && coreMode!=='npcTalk' && coreMode!=='buyProp'){
+        return;
+      }
+
+      var px=save.player.x, py=save.player.y;
+
+      // 1) NPC talk has priority (only if core isn't already showing something else)
+      var nearN=nearestNPC(px,py);
+      if(nearN && nearN.d<95){
+        btn.style.display='block';
+        btn.textContent=(nearN.n.lotId==='home')?'Say Hi':'Talk';
+        btn.dataset.mode='npcTalk';
+        btn.dataset.lot=nearN.n.lotId;
+        return;
+      }
+
+      // 2) Property purchase at building proximity
+      var nearL=nearestBuyableLot(px,py);
+      if(nearL && nearL.d<80){
+        btn.style.display='block';
+        btn.textContent='Buy Property';
+        btn.dataset.mode='buyProp';
+        btn.dataset.lot=nearL.L.id;
+        return;
+      }
+
+      // Otherwise: leave the Action button alone (core loop controls it).
+    }catch(e){}
+  }
+
+  // --- Action button click handler (capture) ---
+  function bindBtn(){
+    var btn=getBtn(); if(!btn || btn.__patchedAction) return;
+    btn.__patchedAction=true;
+    btn.addEventListener('click', function(ev){
+      try{
+        if(!btn.dataset) return;
+        var mode=btn.dataset.mode;
+        if(mode!=='npcTalk' && mode!=='buyProp') return;
+        try{ ev.preventDefault(); ev.stopPropagation(); ev.stopImmediatePropagation(); }catch(_){}
+        if(mode==='npcTalk'){
+          var id=btn.dataset.lot;
+          save.contracts = save.contracts || {};
+          if(id==='home'){ say("Mom","Catch gophers to earn money. Check traps tomorrow. Speak to neighbors for business."); return; }
+          // only two outcomes
+          if(save.contracts[id]){ say("Neighbor","You have my business, don’t let me down."); return; }
+          if(Math.random()<0.55){ try{ save.goAwayDay = save.goAwayDay||{}; save.goAwayDay[id]=save.day; }catch(e){} try{ if(save.npcMood) save.npcMood[id]="frown"; }catch(e){} say("Neighbor","Go away."); try{ if(typeof persist==="function") persist(); }catch(_e){} return; }
+          save.contracts[id]=true;
+          say("Neighbor","You have my business, don’t let me down.");
+          try{ if(typeof persist==='function') persist(); }catch(_){}
+          return;
+        }
+        if(mode==='buyProp'){
+          var lotId=btn.dataset.lot;
+          var Ls=getLots(); var L=null;
+          if(Ls){ for(var i=0;i<Ls.length;i++){ if(Ls[i] && Ls[i].id===lotId){ L=Ls[i]; break; } } }
+          if(!L){ say("Shop","Can't buy this."); return; }
+          var cost=lotPrice(L);
+          save.money = save.money||0;
+          save.owned = save.owned || {};
+          if(save.owned[lotId]){ say("Shop","You already own it."); return; }
+          if(save.money < cost){ say("Shop","Not enough money."); return; }
+          save.money -= cost;
+          save.owned[lotId]=true;
+          say("Shop","Purchased property.");
+          try{ if(typeof persist==='function') persist(); }catch(_){}
+          return;
+        }
+      }catch(e){}
+    }, true);
+  }
+
+  // --- Touching NPC triggers talk ---
+  function touchTalk(){
+    try{
+      if(!save || !save.player) return;
+      var btn=getBtn(); if(!btn) return;
+      var px=save.player.x, py=save.player.y;
+      var nearN=nearestNPC(px,py);
+      if(nearN && nearN.d<26){
+        if(btn.__touchCD) return;
+        btn.__touchCD=true;
+        setTimeout(function(){ btn.__touchCD=false; }, 900);
+        // direct talk
+        save.contracts = save.contracts || {};
+        var id=nearN.n.lotId;
+        if(id==='home'){ say("Mom","Catch gophers to earn money. Check traps tomorrow. Speak to neighbors for business."); return; }
+        if(save.contracts[id]){ say("Neighbor","You have my business, don’t let me down."); return; }
+        if(Math.random()<0.55){ try{ save.goAwayDay = save.goAwayDay||{}; save.goAwayDay[id]=save.day; }catch(e){} try{ if(save.npcMood) save.npcMood[id]="frown"; }catch(e){} say("Neighbor","Go away."); try{ if(typeof persist==="function") persist(); }catch(_e){} return; }
+        save.contracts[id]=true;
+        say("Neighbor","You have my business, don’t let me down.");
+        try{ if(typeof persist==='function') persist(); }catch(_){}
+      }
+    }catch(e){}
+  }
+
+  // --- Daily respawn: every lot gets holes after day changes ---
+  function respawnAllLots(){
+    try{
+      var Ls=getLots(); if(!Ls || !save) return;
+      save.holes = save.holes || [];
+      // keep trapped holes (set/ready/caught) so you can check them
+      var kept=[];
+      for(var i=0;i<save.holes.length;i++){
+        var h=save.holes[i]; if(!h) continue;
+        var tr=h.trap||{};
+        if(tr.state && tr.state!=='none') kept.push(h);
+      }
+      save.holes = kept;
+
+      for(var j=0;j<Ls.length;j++){
+        var L=Ls[j]; if(!L || !L.yard) continue;
+        var target=(L.id==='home')?2:1;
+        var count=0;
+        for(var k=0;k<save.holes.length;k++){
+          if(save.holes[k] && save.holes[k].lotId===L.id) count++;
+        }
+        while(count<target){
+          var nh=null;
+          try{ if(typeof spawnHoleOnLot==='function') nh = spawnHoleOnLot(L.id); }catch(e){ nh=null; }
+          if(!nh){
+            // fallback
+            var x=L.yard.x + L.yard.w*(0.25+Math.random()*0.5);
+            var y=L.yard.y + L.yard.h*(0.25+Math.random()*0.5);
+            nh={id:"hx"+Date.now()+"_"+Math.floor(Math.random()*1e6), x:x, y:y, lotId:L.id, trap:{state:'none', type:'basic', daySet:null, success:null}};
+          }
+          nh.dayCreated = save.day;
+          save.holes.push(nh);
+          count++;
+        }
+      }
+      try{ if(typeof persist==='function') persist(); }catch(_){}
+    }catch(e){}
+  }
+
+  var lastDay=null, seeded=false;
+  setInterval(function(){
+    try{
+      if(typeof save==='undefined' || !save) return;
+      if(typeof save.day!=='number') return;
+      ensureNPCs();
+      bindBtn();
+      stripFlyerUI();
+      driveActionUI();
+      touchTalk();
+
+      if(!seeded){ seeded=true; lastDay=save.day; }
+      if(lastDay===null) lastDay=save.day;
+      if(save.day !== lastDay){
+        lastDay=save.day;
+        respawnAllLots();
+      }
+    }catch(e){}
+  }, 140);
+
+  // Also respawn once shortly after game starts (so extras-on mid-day still populates)
+  setTimeout(function(){
+    try{
+      if(typeof save!=='undefined' && save && typeof save.day==='number') respawnAllLots();
+    }catch(e){}
+  }, 1200);
+
+})();
+/* === END PATCH === */
+
+/* === PATCH: Rename + new start instructions + Bike ($100, 2x speed, toggle) === */
+(function(){
+  try{ if(document.getElementById('buyBike')) return; }catch(e){}
+
+  try{ window.GAME_TITLE = "Gopher Trapper"; }catch(e){}
+  try{ document.title = "Gopher Trapper"; }catch(e){}
+
+  function showStartInstructions(){
+    try{ if(typeof showDialog==='function'){ showDialog("Gopher Trapper", "Your town is being overrun by pocket gophers. It’s your job to clean up your town and make money before your rival does it. Remember to keep your customers happy. Make sure to enable extras in the menu.", 6500); return; } }catch(e){}
+    try{ if(typeof showToast==='function'){ showToast("Your town is being overrun by pocket gophers. It’s your job to clean up your town and make money before your rival does it. Remember to keep your customers happy. Make sure to enable extras in the menu."); return; } }catch(e){}
+  }
+
+  function hookNewGameButton(){
+    try{
+      var btn = document.getElementById('newGameBtn') || document.getElementById('btnNewGame') || document.getElementById('newGame') || null;
+      if(!btn){
+        var cands = Array.from(document.querySelectorAll('button'));
+        btn = cands.find(b => (b.textContent||"").toLowerCase().includes("new game"));
+      }
+      if(!btn || btn.__startInstr) return true;
+      btn.__startInstr = true;
+      btn.addEventListener('click', function(){ setTimeout(showStartInstructions, 80); }, true);
+      return true;
+    }catch(e){ return false; }
+  }
+
+  function ensureBikeState(){
+    try{
+      if(typeof save==='undefined' || !save) return;
+      if(typeof save.hasBike!=='boolean') save.hasBike=false;
+      if(typeof save.bikeOn!=='boolean') save.bikeOn=false;
+    }catch(e){}
+  }
+
+  function applyBikeSpeed(){
+    try{
+      if(typeof save==='undefined' || !save || !save.player) return;
+      ensureBikeState();
+      var mul = (save.hasBike && save.bikeOn) ? 2.0 : 1.0;
+      var pl = save.player;
+      if(pl.__baseSpeed==null && typeof pl.speed==='number') pl.__baseSpeed = pl.speed;
+      if(pl.__baseMaxSpeed==null && typeof pl.maxSpeed==='number') pl.__baseMaxSpeed = pl.maxSpeed;
+      if(pl.__baseMoveSpeed==null && typeof pl.moveSpeed==='number') pl.__baseMoveSpeed = pl.moveSpeed;
+
+      if(typeof pl.speed==='number' && pl.__baseSpeed!=null) pl.speed = pl.__baseSpeed * mul;
+      if(typeof pl.maxSpeed==='number' && pl.__baseMaxSpeed!=null) pl.maxSpeed = pl.__baseMaxSpeed * mul;
+      if(typeof pl.moveSpeed==='number' && pl.__baseMoveSpeed!=null) pl.moveSpeed = pl.__baseMoveSpeed * mul;
+    }catch(e){}
+  }
+
+  function addBikeButtons(){
+    try{
+      ensureBikeState();
+      var panel = document.getElementById('menuPanel');
+      if(!panel) return false;
+
+      if(!document.getElementById('buyBikeBtn')){
+        var buy = document.createElement('button');
+        buy.id = 'buyBikeBtn';
+        buy.className = 'secondary';
+        buy.textContent = 'Buy Bike ($100)';
+        buy.style.marginTop = '8px';
+        buy.addEventListener('click', function(){
+          try{
+            if(!save) return;
+            ensureBikeState();
+            if(save.hasBike){ if(typeof showDialog==='function') showDialog('Shop','You already own a bike.',1600); return; }
+            if((save.money||0) < 100){ if(typeof showDialog==='function') showDialog('Shop','Not enough money.',1600); else if(typeof showToast==='function') showToast('Not enough money.'); return; }
+            save.money = (save.money||0) - 100;
+            save.hasBike = true;
+            save.bikeOn = true;
+            applyBikeSpeed();
+            if(typeof showDialog==='function') showDialog('Shop','Bought a bike! Speed x2 (toggle in menu).',2200);
+            try{ if(typeof persist==='function') persist(); }catch(_e){}
+          }catch(e){}
+        });
+        panel.appendChild(buy);
+      }
+
+      if(!document.getElementById('toggleBikeBtn')){
+        var tog = document.createElement('button');
+        tog.id = 'toggleBikeBtn';
+        tog.className = 'secondary';
+        tog.textContent = 'Bike: OFF';
+        tog.style.marginTop = '8px';
+        tog.addEventListener('click', function(){
+          try{
+            if(!save) return;
+            ensureBikeState();
+            if(!save.hasBike){ if(typeof showDialog==='function') showDialog('Bike','You don\'t own a bike yet.',1600); return; }
+            save.bikeOn = !save.bikeOn;
+            tog.textContent = save.bikeOn ? 'Bike: ON' : 'Bike: OFF';
+            applyBikeSpeed();
+            try{ if(typeof persist==='function') persist(); }catch(_e){}
+          }catch(e){}
+        });
+        panel.appendChild(tog);
+      }
+
+      var buyBtn = document.getElementById('buyBikeBtn');
+      var togBtn = document.getElementById('toggleBikeBtn');
+      if(buyBtn) buyBtn.style.display = (save && save.hasBike) ? 'none' : 'block';
+      if(togBtn){
+        togBtn.style.display = (save && save.hasBike) ? 'block' : 'none';
+        togBtn.textContent = (save && save.hasBike && save.bikeOn) ? 'Bike: ON' : 'Bike: OFF';
+      }
+      return true;
+    }catch(e){ return false; }
+  }
+
+  function patchTitleVars(){
+    try{ if(typeof TITLE!=='undefined') TITLE = "Gopher Trapper"; }catch(e){}
+    try{ if(typeof gameTitle!=='undefined') gameTitle = "Gopher Trapper"; }catch(e){}
+  }
+
+  var tries=0;
+  var iv=setInterval(function(){
+    tries++;
+    try{
+      patchTitleVars();
+      hookNewGameButton();
+      addBikeButtons();
+      applyBikeSpeed();
+      if(tries>800) clearInterval(iv);
+    }catch(e){ if(tries>800) clearInterval(iv); }
+  }, 200);
+})();
+/* === END PATCH === */
+</script>
+
+<div id="choiceModal" style="position:fixed;left:0;top:0;right:0;bottom:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0.45);z-index:10050;">
+  <div style="width:min(92vw,520px);background:rgba(255,255,255,0.96);border-radius:16px;border:2px solid rgba(0,0,0,0.25);padding:14px 14px 12px;box-shadow:0 14px 34px rgba(0,0,0,0.25);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;">
+    <div id="choiceTitle" style="font-weight:800;font-size:18px;margin-bottom:6px;">Offer</div>
+    <div id="choiceText" style="font-size:15px;line-height:1.25;margin-bottom:12px;white-space:pre-line;">...</div>
+    <div style="display:flex;gap:10px;">
+      <button id="choiceCancel" class="secondary" style="flex:1;">No thanks</button>
+      <button id="choiceOK" style="flex:1;background:var(--green);border:none;border-radius:14px;color:#fff;font-weight:800;padding:12px 10px;">Buy</button>
+    </div>
+  </div>
+</div>
+
+</body>
+
+</html>
+
+<script>
+// NPC_SMILE_TIMEOUT: revert temporary smiles
+(function(){
+  try{
+    setInterval(function(){
+      if(!window.save || !save.npcMood) return;
+      for(const k in save.npcMood){
+        if(save.contracts && save.contracts[k]) continue;
+        // neutralize smiles after ~1.5s
+        if(save.npcMood[k]==='smile'){
+          save.npcMood[k]='neutral';
+        }
+      }
+    }, 1500);
+  }catch(e){}
+})();
+</script> 
