@@ -1259,16 +1259,6 @@ function randomRivalEvent(){
         return;
       }
 
-      const d=nearestDoor();
-      if(d && d.d<95){
-        const id=d.lot.id;
-        if(save.contracts[id]){
-          ensureCustomer(id);
-          actionBtn.textContent = (id==='home') ? "Say Hi" : `Talk (${save.customers[id].sat}%)`;
-          actionBtn.dataset.mode="doorInfo";
-          actionBtn.dataset.lot=id;
-          return;
-        }
         if(save.rivalHold[id]){
           actionBtn.textContent=`Rival (${save.rivalHold[id]}d)`;
           actionBtn.dataset.mode="none";
