@@ -2381,22 +2381,7 @@ return;
       },7000);
     });
 
-    /* tapAnywhereStart fallback */
-(function(){
-  try{
-    var startRoot=document.getElementById('startScreen');
-    if(!startRoot) return;
-    var fired=false;
-    function maybeStart(){
-      if(fired) return;
-      fired=true;
-      try{ if(btnContinue && !btnContinue.disabled) btnContinue.click(); else if(btnNew) btnNew.click(); }catch(e){}
-      setTimeout(function(){ fired=false; }, 500);
-    }
-    startRoot.addEventListener('pointerdown', function(e){ try{ e.preventDefault(); }catch(_){} maybeStart(); }, {passive:false});
-    startRoot.addEventListener('touchstart', function(e){ try{ e.preventDefault(); }catch(_){} maybeStart(); }, {passive:false});
-  }catch(e){}
-})();
+
 bindStart(btnContinue, function(){
       save=migrateSave(loadSave() || save);
       buildTown();
