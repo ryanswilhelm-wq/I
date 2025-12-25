@@ -304,6 +304,18 @@ const analog=document.getElementById('analog');
     function clamp(v,a,b){ return Math.max(a,Math.min(b,v)); }
     function dist(ax,ay,bx,by){ return Math.hypot(ax-bx, ay-by); }
     function rand01(){ return Math.random(); }
+    function countUncheckedTraps(){
+  if(!Array.isArray(save.holes)) return 0;
+
+  let n = 0;
+  for(const h of save.holes){
+    if(h.trap && h.trap.state === 'ready'){
+      n++;
+    }
+  }
+  return n;
+}
+
 
     const WORLD_W=4200, WORLD_H=2700;
     const SAVE_KEY='gopherHustleSave_v132_pages_cb_20251222_210500';
@@ -1402,7 +1414,7 @@ function countUncheckedTraps(){
   document.getElementById('money').textContent=Math.floor(save.money);
   document.getElementById('gophers').textContent=save.gophers;
   document.getElementById('traps').textContent=(save.trapsInv + (save.silverTraps||0) + (save.goldTraps||0) + (save.platinumTraps||0));
-  document.getElementById('unchecked').textContent=countUncheckedTraps(); // ← THIS
+  document.getElementById('unchecked').textContent=countUncheckedTraps(); 
   document.getElementById('cust').textContent=Object.keys(save.contracts||{}).length;
   document.getElementById('day').textContent=save.day;
   document.getElementById('time').textContent=formatClock(save.daySecondsLeft);
