@@ -1123,7 +1123,6 @@ function randomRivalEvent(){
       const pct = total>0 ? Math.round((caught/total)*100) : 0;
       add("📊 Stats", `Caught <b>${caught}</b> • Missed <b>${missed}</b><br/>Catch rate <b>${pct}%</b>`);
 
-      add("📨 Flyers → Leads", data.leads.turned.length ? `New leads: <b>${data.leads.turned.length}</b><br/>${data.leads.turned.map(n=>`• ${n}`).join('<br/>')}` : "No new leads tonight.");
       add("😊 Satisfaction", data.cust.lost.length ? `Lost: <b>${data.cust.lost.length}</b><br/>${data.cust.lost.map(n=>`• ${n}`).join('<br/>')}` : (data.cust.warned.length ? `Warnings:<br/>${data.cust.warned.map(n=>`• ${n}`).join('<br/>')}` : "Everyone is happy."));
       add("🕴️ Rival", (data.rival && data.rival.happened) ? (()=>{const parts=[];
         if(data.rival.gained && data.rival.gained.length) parts.push(`Gained: <b>${data.rival.gained.length}</b><br/>${data.rival.gained.map(n=>`• ${n}`).join("<br/>")}`);
