@@ -235,6 +235,16 @@
     const startScreen=document.getElementById('startScreen');
     const btnNew=document.getElementById('btnNew');
     const btnContinue=document.getElementById('btnContinue');
+    function lockStartButtons(lock){
+  const btns = [btnNew, btnContinue];
+  btns.forEach(b=>{
+    if(!b) return;
+    b.disabled = lock;
+    b.style.opacity = lock ? '0.55' : '1';
+    b.style.pointerEvents = lock ? 'none' : 'auto';
+  });
+}
+
 const analog=document.getElementById('analog');
     const knob=document.getElementById('knob');
     const actionBtn=document.getElementById('actionBtn');
