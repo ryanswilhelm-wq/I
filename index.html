@@ -1361,7 +1361,6 @@ function randomRivalEvent(){
       document.getElementById('money').textContent=Math.floor(save.money);
       document.getElementById('gophers').textContent=save.gophers;
       document.getElementById('traps').textContent=(save.trapsInv + (save.silverTraps||0) + (save.goldTraps||0) + (save.platinumTraps||0));
-      document.getElementById('flyers').textContent=save.flyers;
       document.getElementById('cust').textContent=Object.keys(save.contracts||{}).length;
       document.getElementById('day').textContent=save.day;
       document.getElementById('time').textContent=formatClock(save.daySecondsLeft);
