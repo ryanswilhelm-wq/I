@@ -1383,11 +1383,14 @@ function countUncheckedTraps(){
 }
 
 function countUncheckedTraps(){
-  if(!Array.isArray(holes)) return 0;
+  if(!Array.isArray(lots)) return 0;
 
   let n = 0;
-  for(const h of holes){
-    if(h.trap) n++;
+  for(const lot of lots){
+    if(!Array.isArray(lot.holes)) continue;
+    for(const h of lot.holes){
+      if(h.trap) n++;
+    }
   }
   return n;
 }
