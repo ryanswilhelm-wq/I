@@ -1496,18 +1496,14 @@ function randomRivalEvent(){
         mini.fillRect((l.yard.x+l.yard.w/2)/WORLD_W*w-2, (l.yard.y+l.yard.h/2)/WORLD_H*h-2, 4, 4);
       }
      for(const ho of save.holes){
-
   if(ho.trap && ho.trap.state === 'ready'){
-    // UNCHECKED TRAPS → GOLD
-    mini.fillStyle = 'rgba(212,175,55,.95)';
+    mini.fillStyle = 'rgba(212,175,55,.95)'; // GOLD = unchecked
   }
   else if(ho.trap && ho.trap.state === 'set'){
-    // Trap placed today
-    mini.fillStyle = 'rgba(230,230,230,.9)';
+    mini.fillStyle = 'rgba(230,230,230,.9)'; // placed today
   }
   else{
-    // Empty hole
-    mini.fillStyle = 'rgba(90,40,15,.9)';
+    mini.fillStyle = 'rgba(90,40,15,.9)'; // empty hole
   }
 
   mini.fillRect(
