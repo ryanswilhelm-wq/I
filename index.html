@@ -304,6 +304,7 @@ const analog=document.getElementById('analog');
     function clamp(v,a,b){ return Math.max(a,Math.min(b,v)); }
     function dist(ax,ay,bx,by){ return Math.hypot(ax-bx, ay-by); }
     function rand01(){ return Math.random(); }
+
     function countUncheckedTraps(){
   if(!Array.isArray(save.holes)) return 0;
 
@@ -315,6 +316,8 @@ const analog=document.getElementById('analog');
   }
   return n;
 }
+
+
 
 
     const WORLD_W=4200, WORLD_H=2700;
@@ -1369,8 +1372,6 @@ function randomRivalEvent(){
     document.getElementById('btnCustomers').addEventListener('click', openCustomers);
     custClose.addEventListener('click', closeCustomers);
     
-function countUncheckedTraps(){
-  if(!Array.isArray(traps)) return 0;
 
   let n = 0;
   for(const t of traps){
@@ -1381,8 +1382,7 @@ function countUncheckedTraps(){
   }
   return n;
 }
-function countUncheckedTraps(){
-  if(!Array.isArray(traps)) return 0;
+
 
   let n = 0;
   for(const t of traps){
@@ -1394,8 +1394,7 @@ function countUncheckedTraps(){
   return n;
 }
 
-function countUncheckedTraps(){
-  if(!Array.isArray(lots)) return 0;
+
 
   let n = 0;
   for(const lot of lots){
