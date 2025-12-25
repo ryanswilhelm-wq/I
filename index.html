@@ -740,8 +740,8 @@ function ensureDailyMounds(){
   for(const lot of lots){
     if(!lot || !lot.id) continue;
 
-    // Home gets 2, everything else gets 1
-    const target = (lot.id === 'home') ? 2 : 1;
+    // Everything gets 2
+    const target = (lot.id === 'home') ? 2 :2;
 
     let count = 0;
     for(const h of save.holes){
