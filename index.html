@@ -732,6 +732,31 @@ function rebuildNPCs(){
       }
       return null;
     }
+    // === DAILY MOUND / HOLE GUARANTEE ===
+// Ensures every lot (houses + civic) always has mounds
+function ensureDailyMounds(){
+  if(!Array.isArray(lots) || !Array.isArray(save.holes)) return;
+
+  for(const lot of lots){
+    if(!lot || !lot.id) continue;
+
+    // Home gets 2, everything else gets 1
+    const target = (lot.id === 'home') ? 2 : 1;
+
+    let count = 0;
+    for(const h of save.holes){
+      if(h && h.lotId === lot.id) count++;
+    }
+
+    while(count < target){
+      const h = spawnHoleOnLot(lot.id);
+      if(!h) break;
+      save.holes.push(h);
+      count++;
+    }
+  }
+}
+
     function overnightChance(type){
       const wx=WX[save.weather]||WX.clear;
       const t=type||'basic';
@@ -1516,7 +1541,7 @@ function randomRivalEvent(){
     3, 3
   );
 }
-
+  }
 
 
     // menu actions
@@ -2465,8 +2490,10 @@ function startStartupProgress(durationMs){
     buildTown();
     rebuildNPCs();
     startDaySpawn(true);
+    ensureDailyMounds();
     spawnAtHomeDriveway();
     persist();
+    ensureDailyMounds();
     startUI();
     showToast("Set traps on the 2 holes in your yard.");
   }, 10000);
