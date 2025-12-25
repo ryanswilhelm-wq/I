@@ -2642,9 +2642,7 @@ function showChoice(title, text, okText, cancelText, onOK){
       // do NOT override it. This prevents the "first trap" glitch where the patch
       // hides or rewrites the Action button right as you try to set a trap.
       var coreMode = btn.dataset.mode || '';
-      if(coreMode && coreMode!=='none' && coreMode!=='npcTalk' && coreMode!=='buyProp'){
-        return;
-      }
+      // Buy Property ALWAYS wins
 
       var px=save.player.x, py=save.player.y;
 
