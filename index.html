@@ -2605,16 +2605,7 @@ function showChoice(title, text, okText, cancelText, onOK){
       return !!(save && save.owned && save.owned[lotId]);
     }catch(e){ return false; }
   }
-  if (
-  name.includes("fire") ||
-  name.includes("station") ||
-  name.includes("department") ||
-  name.includes("store") ||
-  name.includes("church") ||
-  name.includes("grocery") ||
-  name.includes("school") ||
-  name.includes("diner") 
-) return 500;
+ 
   
   function nearestBuyableLot(px,py){
     try{
